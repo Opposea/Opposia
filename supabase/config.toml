@@ -1,0 +1,9 @@
+project_id = "gjffltybucegxnjvwema"
+
+# Gift checkout function - creates Stripe checkout sessions
+[functions.create-gift-checkout]
+verify_jwt = true
+
+# Stripe webhook handler
+[functions.stripe-webhook]
+verify_jwt = false
