@@ -65,8 +65,7 @@ const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverNa
         throw new Error('No checkout URL received');
       }
     } catch (error: any) {
-      console.error('Error creating gift checkout:', error);
-      toast.error(error.message || 'Failed to create checkout session');
+      toast.error('Failed to create checkout session');
     } finally {
       setIsLoading(false);
     }
