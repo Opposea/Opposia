@@ -8,22 +8,52 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Server-side gift catalog - prices in pence (GBP)
+const GIFT_CATALOG: Record<string, { name: string; price: number }> = {
+  'rose': { name: '🌹 Rose', price: 360 },
+  'heart': { name: '❤️ Heart', price: 360 },
+  'coffee': { name: '☕ Coffee', price: 360 },
+};
+
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUUID(str: string): boolean {
+  return UUID_REGEX.test(str);
+}
+
 interface GiftCheckoutRequest {
   giftId: string;
-  giftName: string;
-  giftPrice: number;
   receiverId: string;
-  receiverName: string;
   matchId: string;
   message?: string;
 }
 
-console.log('Edge function initialized');
+// Simple in-memory rate limiting (resets on function cold start)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 10; // Max requests per window
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute window
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const userLimit = rateLimitMap.get(userId);
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitMap.set(userId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  
+  if (userLimit.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+  
+  userLimit.count++;
+  return true;
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('CORS preflight request received');
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -33,10 +63,10 @@ serve(async (req) => {
     if (!stripeKey) {
       console.error('CRITICAL: STRIPE_SECRET_KEY not set');
       return new Response(
-        JSON.stringify({ error: 'Payment service configuration error' }),
+        JSON.stringify({ error: 'Payment service temporarily unavailable' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
+          status: 503,
         }
       );
     }
@@ -48,10 +78,10 @@ serve(async (req) => {
     if (!supabaseUrl || !supabaseAnonKey) {
       console.error('CRITICAL: Supabase configuration missing');
       return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
+        JSON.stringify({ error: 'Service temporarily unavailable' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
+          status: 503,
         }
       );
     }
@@ -59,7 +89,7 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Authentication required - please log in' }),
+        JSON.stringify({ error: 'Authentication required' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 401,
@@ -73,9 +103,9 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      console.error('Authentication failed:', authError?.message);
+      console.error('Authentication failed');
       return new Response(
-        JSON.stringify({ error: 'Authentication failed - please log in again' }),
+        JSON.stringify({ error: 'Authentication failed' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 401,
@@ -83,16 +113,53 @@ serve(async (req) => {
       );
     }
 
+    // Rate limiting check
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please wait a moment.' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429,
+        }
+      );
+    }
+
     // Parse request body
-    const { 
-      giftId, 
-      giftName, 
-      giftPrice, 
-      receiverId, 
-      receiverName, 
-      matchId,
-      message 
-    }: GiftCheckoutRequest = await req.json();
+    const body = await req.json();
+    const { giftId, receiverId, matchId, message }: GiftCheckoutRequest = body;
+
+    // Validate gift ID exists in catalog (SERVER-SIDE PRICE LOOKUP)
+    const gift = GIFT_CATALOG[giftId];
+    if (!gift) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid gift selection' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    // Validate UUID formats
+    if (!isValidUUID(receiverId)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    if (!isValidUUID(matchId)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
 
     // Validate message length if provided
     if (message && message.length > 200) {
@@ -104,13 +171,64 @@ serve(async (req) => {
         }
       );
     }
+
+    // Verify the match exists and involves both users
+    const { data: matchData, error: matchError } = await supabase
+      .from('matches')
+      .select('id, user1_id, user2_id, status')
+      .eq('id', matchId)
+      .eq('status', 'matched')
+      .single();
+
+    if (matchError || !matchData) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid match' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    // Verify sender is part of the match
+    const isUserInMatch = matchData.user1_id === user.id || matchData.user2_id === user.id;
+    if (!isUserInMatch) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403,
+        }
+      );
+    }
+
+    // Verify receiver is the other user in the match
+    const expectedReceiver = matchData.user1_id === user.id ? matchData.user2_id : matchData.user1_id;
+    if (receiverId !== expectedReceiver) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid recipient' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    // Get receiver profile for display name
+    const { data: receiverProfile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('user_id', receiverId)
+      .single();
+
+    const receiverName = receiverProfile?.name || 'User';
+
     const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    // Create Stripe checkout session
-    console.log('Creating Stripe checkout session...');
+    // Create Stripe checkout session with SERVER-SIDE price
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -118,10 +236,10 @@ serve(async (req) => {
           price_data: {
             currency: 'gbp',
             product_data: {
-              name: giftName,
+              name: gift.name,
               description: `Virtual gift for ${receiverName}`,
             },
-            unit_amount: giftPrice,
+            unit_amount: gift.price, // Use server-side price
           },
           quantity: 1,
         },
@@ -133,7 +251,7 @@ serve(async (req) => {
       metadata: {
         sender_id: user.id,
         gift_id: giftId,
-        gift_name: giftName,
+        gift_name: gift.name,
         receiver_id: receiverId,
         match_id: matchId,
         message: message || '',
@@ -151,17 +269,12 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error('❌ ERROR in create-gift-checkout:', error);
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    // Log detailed error server-side only
+    console.error('Error in create-gift-checkout:', error.message);
     
+    // Return generic error to client
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'An unexpected error occurred',
-        details: error.toString(),
-        type: error.name
-      }),
+      JSON.stringify({ error: 'Unable to process request. Please try again.' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

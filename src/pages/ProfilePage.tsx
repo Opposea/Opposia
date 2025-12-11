@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidUUID } from '@/lib/validation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -154,7 +155,7 @@ const ProfilePage = () => {
       if (error) throw error;
       setQuizAnswers(data || []);
     } catch (error) {
-      console.error('Error fetching quiz answers:', error);
+      // Error fetching quiz answers - silent fail
     }
   };
 
@@ -213,7 +214,7 @@ const ProfilePage = () => {
         sexual_orientation: data?.sexual_orientation || '',
       });
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // Error fetching profile - silent fail
     }
   };
 
@@ -252,7 +253,7 @@ const ProfilePage = () => {
                 });
               compatibilityScore = score || 0;
             } catch (error) {
-              console.error('Error calculating compatibility:', error);
+              // Error calculating compatibility - continue with default
             }
 
             return {
@@ -266,7 +267,7 @@ const ProfilePage = () => {
         setMatches(matchesWithProfiles);
       }
     } catch (error) {
-      console.error('Error fetching matches:', error);
+      // Error fetching matches - silent fail
     }
   };
 
@@ -281,8 +282,6 @@ const ProfilePage = () => {
       if (error) throw error;
 
       if (profiles) {
-        console.log('Compatible profiles fetched:', profiles.length);
-        
         // Get users that the current user has blocked
         const { data: currentBlockedData } = await supabase
           .from('blocked_users' as any)
@@ -321,8 +320,6 @@ const ProfilePage = () => {
           return !isBlocked && !isConnected;
         });
         
-        console.log('Profiles after filtering blocked/connected:', filteredProfiles.length);
-        
         // Calculate comprehensive compatibility scores for each potential match
         const matchesWithScores = await Promise.all(
           filteredProfiles.map(async (otherProfile) => {
@@ -337,7 +334,7 @@ const ProfilePage = () => {
                 });
               totalScore += (quizScore || 0) * 0.4;
             } catch (error) {
-              console.error('Error calculating quiz compatibility:', error);
+              // Error calculating compatibility - continue with other scores
             }
             
             // 2. Age compatibility (30% weight)
@@ -387,7 +384,7 @@ const ProfilePage = () => {
         setPotentialMatches(matchesWithScores);
       }
     } catch (error) {
-      console.error('Error fetching potential matches:', error);
+      // Error fetching potential matches - silent fail
     } finally {
       setLoading(false);
     }
@@ -419,7 +416,7 @@ const ProfilePage = () => {
         setBlockedUsersProfiles([]);
       }
     } catch (error) {
-      console.error('Error fetching blocked users:', error);
+      // Error fetching blocked users - silent fail
     }
   };
 
@@ -433,10 +430,11 @@ const ProfilePage = () => {
       return;
     }
 
-    if (!blockedUserId) {
+    // Validate UUID format
+    if (!blockedUserId || !isValidUUID(blockedUserId)) {
       toast({
         title: "Error",
-        description: "Invalid user ID",
+        description: "Invalid user",
         variant: "destructive",
       });
       return;
@@ -450,7 +448,7 @@ const ProfilePage = () => {
         .or(`and(user1_id.eq.${user.id},user2_id.eq.${blockedUserId}),and(user1_id.eq.${blockedUserId},user2_id.eq.${user.id})`);
 
       if (deleteMatchError) {
-        console.error('Error deleting matches:', deleteMatchError);
+        // Error deleting matches - continue with block
       }
 
       // Then block the user
@@ -475,7 +473,6 @@ const ProfilePage = () => {
       fetchPotentialMatches();
       fetchMatches();
     } catch (error: any) {
-      console.error('Error blocking user:', error);
       toast({
         title: "Error",
         description: error?.message || "Failed to block user",
@@ -485,7 +482,7 @@ const ProfilePage = () => {
   };
 
   const unblockUser = async (blockedUserId: string) => {
-    if (!user?.id) return;
+    if (!user?.id || !isValidUUID(blockedUserId)) return;
     
     try {
       // First, delete any existing matches/requests with this user
@@ -495,7 +492,7 @@ const ProfilePage = () => {
         .or(`and(user1_id.eq.${user.id},user2_id.eq.${blockedUserId}),and(user1_id.eq.${blockedUserId},user2_id.eq.${user.id})`);
 
       if (deleteMatchError) {
-        console.error('Error deleting matches:', deleteMatchError);
+        // Error deleting matches - continue with unblock
       }
 
       // Then unblock the user
@@ -517,7 +514,6 @@ const ProfilePage = () => {
       fetchPotentialMatches();
       fetchMatchRequests(); // Refresh requests list too
     } catch (error) {
-      console.error('Error unblocking user:', error);
       toast({
         title: "Error",
         description: "Failed to unblock user",
@@ -583,7 +579,6 @@ const ProfilePage = () => {
       setEditMode(false);
       fetchProfile();
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -625,7 +620,6 @@ const ProfilePage = () => {
       // Sign out and redirect
       window.location.href = '/';
     } catch (error) {
-      console.error('Error deleting account:', error);
       toast({
         title: "Error",
         description: "Failed to delete account. Please contact support.",
@@ -719,12 +713,20 @@ const ProfilePage = () => {
         setOutgoingRequests([]);
       }
     } catch (error) {
-      console.error('Error fetching match requests:', error);
+      // Error fetching match requests - silent fail
     }
   };
 
   const sendMatch = async (targetUserId: string) => {
-    console.log('Sending match request from', user?.id, 'to', targetUserId);
+    // Validate UUID before proceeding
+    if (!isValidUUID(targetUserId)) {
+      toast({
+        title: "Error",
+        description: "Invalid user",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       // CRITICAL: Check compatibility BEFORE sending match request
@@ -735,7 +737,6 @@ const ProfilePage = () => {
         });
 
       if (compatError) {
-        console.error('Error checking compatibility:', compatError);
         throw compatError;
       }
 
@@ -755,11 +756,8 @@ const ProfilePage = () => {
         .or(`and(user1_id.eq.${user?.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user?.id})`);
 
       if (checkError) {
-        console.error('Error checking existing match:', checkError);
         throw checkError;
       }
-
-      console.log('Existing matches check:', existingMatches);
 
       // If any matches exist (in either direction), don't allow creating another
       if (existingMatches && existingMatches.length > 0) {
@@ -799,7 +797,6 @@ const ProfilePage = () => {
       fetchMatchRequests();
       fetchPotentialMatches();
     } catch (error: any) {
-      console.error('Error sending match:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to send match request. Please check permissions.",
@@ -825,7 +822,6 @@ const ProfilePage = () => {
       fetchMatches();
       fetchMatchRequests();
     } catch (error) {
-      console.error('Error accepting match:', error);
       toast({
         title: "Error",
         description: "Failed to accept match request.",
@@ -840,17 +836,15 @@ const ProfilePage = () => {
   };
 
   const rejectMatchRequest = async (matchId: string) => {
+    if (!isValidUUID(matchId)) return;
+    
     try {
-      console.log('Rejecting match request:', matchId);
-      
       const { data, error } = await supabase
         .from('matches')
         .delete()
         .eq('id', matchId)
         .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
         .select();
-
-      console.log('Delete result:', { data, error });
 
       if (error) throw error;
 
@@ -865,7 +859,6 @@ const ProfilePage = () => {
       
       fetchMatchRequests();
     } catch (error: any) {
-      console.error('Error rejecting match:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to reject match request.",
@@ -875,9 +868,9 @@ const ProfilePage = () => {
   };
 
   const deleteMatch = async (matchId: string) => {
+    if (!isValidUUID(matchId)) return;
+    
     try {
-      console.log('Attempting to delete match:', matchId);
-      
       // Verify the user is part of this match
       const matchToDelete = matches.find(m => m.id === matchId);
       if (!matchToDelete) {
@@ -891,8 +884,6 @@ const ProfilePage = () => {
         .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
         .select();
 
-      console.log('Delete result:', { data, error });
-
       if (error) throw error;
 
       toast({
@@ -903,7 +894,6 @@ const ProfilePage = () => {
       // Update local state immediately
       setMatches(prev => prev.filter(m => m.id !== matchId));
     } catch (error: any) {
-      console.error('Error deleting match:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete match. Please check permissions.",

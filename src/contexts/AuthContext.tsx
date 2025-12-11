@@ -95,7 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
       // Ignore errors and clear local state anyway
-      console.log('Sign out completed (with warnings)');
     }
     // Clear local state regardless of API result
     setSession(null);

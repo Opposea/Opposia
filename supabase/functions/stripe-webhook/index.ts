@@ -12,13 +12,23 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUUID(str: string | undefined): boolean {
+  return str ? UUID_REGEX.test(str) : false;
+}
+
+// Server-side gift catalog for validation
+const VALID_GIFT_IDS = ['rose', 'heart', 'coffee'];
+
 serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
   const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
   if (!signature || !webhookSecret) {
     console.error('Missing signature or webhook secret');
-    return new Response('Webhook signature verification failed', { status: 400 });
+    return new Response('Webhook configuration error', { status: 400 });
   }
 
   try {
@@ -31,8 +41,61 @@ serve(async (req) => {
       const metadata = session.metadata;
 
       if (metadata && metadata.gift_id) {
+        // Validate all UUIDs from metadata
+        if (!isValidUUID(metadata.sender_id)) {
+          console.error('Invalid sender_id in metadata');
+          return new Response('Invalid metadata', { status: 400 });
+        }
 
-        // Insert gift record using sender_id from metadata
+        if (!isValidUUID(metadata.receiver_id)) {
+          console.error('Invalid receiver_id in metadata');
+          return new Response('Invalid metadata', { status: 400 });
+        }
+
+        if (!isValidUUID(metadata.match_id)) {
+          console.error('Invalid match_id in metadata');
+          return new Response('Invalid metadata', { status: 400 });
+        }
+
+        // Validate gift_id is from our catalog
+        if (!VALID_GIFT_IDS.includes(metadata.gift_id)) {
+          console.error('Invalid gift_id in metadata');
+          return new Response('Invalid gift type', { status: 400 });
+        }
+
+        // Validate message length
+        if (metadata.message && metadata.message.length > 200) {
+          console.error('Message too long in metadata');
+          return new Response('Invalid message', { status: 400 });
+        }
+
+        // Verify the match exists and involves both sender and receiver
+        const { data: matchData, error: matchError } = await supabase
+          .from('matches')
+          .select('id, user1_id, user2_id, status')
+          .eq('id', metadata.match_id)
+          .eq('status', 'matched')
+          .single();
+
+        if (matchError || !matchData) {
+          console.error('Match not found or not active');
+          return new Response('Invalid match', { status: 400 });
+        }
+
+        // Verify sender and receiver are both in the match
+        const matchUsers = [matchData.user1_id, matchData.user2_id];
+        if (!matchUsers.includes(metadata.sender_id) || !matchUsers.includes(metadata.receiver_id)) {
+          console.error('Sender or receiver not in match');
+          return new Response('Invalid participants', { status: 400 });
+        }
+
+        // Verify sender and receiver are different
+        if (metadata.sender_id === metadata.receiver_id) {
+          console.error('Sender and receiver are the same');
+          return new Response('Invalid participants', { status: 400 });
+        }
+
+        // Insert gift record with validated data
         const { error: insertError } = await supabase
           .from('gifts')
           .insert({
@@ -48,8 +111,8 @@ serve(async (req) => {
           });
 
         if (insertError) {
-          console.error('Error inserting gift:', insertError);
-          return new Response('Error recording gift', { status: 500 });
+          console.error('Error inserting gift record');
+          return new Response('Database error', { status: 500 });
         }
       }
     }
@@ -59,7 +122,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error: any) {
-    console.error('Webhook error:', error.message);
-    return new Response(`Webhook Error: ${error.message}`, { status: 400 });
+    console.error('Webhook processing error');
+    return new Response('Webhook processing failed', { status: 400 });
   }
 });
