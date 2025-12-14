@@ -1617,7 +1617,7 @@ const ProfilePage = () => {
                     </div>
                     <h3 className="font-semibold text-xl mb-2">Verification Pending</h3>
                     <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Your verification selfie has been submitted and is being reviewed by our admin team. You'll be able to discover matches once verified.
+                      Your verification selfie has been submitted and is being reviewed by our admin team. Please check back in 24 hours. You'll be able to discover matches once verified.
                     </p>
                   </CardContent>
                 </Card>
