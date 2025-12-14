@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Heart, Eye, EyeOff } from 'lucide-react';
+import { Heart, Eye, EyeOff, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AuthPage = () => {
@@ -19,6 +19,7 @@ const AuthPage = () => {
   const [country, setCountry] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifyingLocation, setVerifyingLocation] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>();
   
   const { signUp, signIn, user } = useAuth();
@@ -98,6 +99,28 @@ const AuthPage = () => {
     return input.replace(/<[^>]*>/g, '').trim();
   };
 
+  const verifyLocation = async (selectedCountry: string): Promise<{ allowed: boolean; message: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-location', {
+        body: { selectedCountry }
+      });
+
+      if (error) {
+        console.error('Location verification error:', error);
+        // Fail open if function unavailable
+        return { allowed: true, message: 'Verification skipped' };
+      }
+
+      return { 
+        allowed: data.allowed, 
+        message: data.message 
+      };
+    } catch (err) {
+      console.error('Location verification failed:', err);
+      return { allowed: true, message: 'Verification skipped' };
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -113,6 +136,17 @@ const AuthPage = () => {
     try {
       let result;
       if (isSignUp) {
+        // Verify location before signup
+        setVerifyingLocation(true);
+        const locationCheck = await verifyLocation(country);
+        setVerifyingLocation(false);
+
+        if (!locationCheck.allowed) {
+          toast.error(locationCheck.message);
+          setLoading(false);
+          return;
+        }
+
         result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country, captchaToken);
         if (!result.error) {
           const ukMessage = country === 'GB' ? ' For UK members, your age will be manually verified before you can access all features.' : '';
@@ -332,8 +366,13 @@ const AuthPage = () => {
               </>
             )}
             
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+            <Button type="submit" className="w-full" disabled={loading || verifyingLocation}>
+              {verifyingLocation ? (
+                <span className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 animate-pulse" />
+                  Verifying location...
+                </span>
+              ) : loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
             </Button>
           </form>
           

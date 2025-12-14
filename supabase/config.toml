@@ -7,3 +7,7 @@ verify_jwt = true
 # Stripe webhook handler
 [functions.stripe-webhook]
 verify_jwt = false
+
+# IP geolocation verification (public - called before auth)
+[functions.verify-location]
+verify_jwt = false
