@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { isAllowedCountry } from '@/lib/validation';
 
 interface AuthContextType {
   user: User | null;
@@ -48,6 +49,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, name: string, dateOfBirth: string, country: string, captchaToken?: string) => {
+    // Validate country before attempting signup
+    if (!isAllowedCountry(country)) {
+      return { 
+        error: { 
+          message: 'Registration is not available in your country. Service is only available in UK, EU, USA, Canada, Australia, and New Zealand.' 
+        } 
+      };
+    }
+
     const redirectUrl = `${window.location.origin}/profile`;
     
     const { error } = await supabase.auth.signUp({
