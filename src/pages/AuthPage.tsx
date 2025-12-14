@@ -270,21 +270,51 @@ const AuthPage = () => {
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="">Select your country</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                    <option value="AU">Australia</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
-                    <option value="ES">Spain</option>
-                    <option value="IT">Italy</option>
-                    <option value="NL">Netherlands</option>
-                    <option value="IE">Ireland</option>
-                    <option value="OTHER">Other</option>
+                    <optgroup label="United Kingdom">
+                      <option value="GB">United Kingdom</option>
+                    </optgroup>
+                    <optgroup label="North America">
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                    </optgroup>
+                    <optgroup label="European Union">
+                      <option value="AT">Austria</option>
+                      <option value="BE">Belgium</option>
+                      <option value="BG">Bulgaria</option>
+                      <option value="HR">Croatia</option>
+                      <option value="CY">Cyprus</option>
+                      <option value="CZ">Czech Republic</option>
+                      <option value="DK">Denmark</option>
+                      <option value="EE">Estonia</option>
+                      <option value="FI">Finland</option>
+                      <option value="FR">France</option>
+                      <option value="DE">Germany</option>
+                      <option value="GR">Greece</option>
+                      <option value="HU">Hungary</option>
+                      <option value="IE">Ireland</option>
+                      <option value="IT">Italy</option>
+                      <option value="LV">Latvia</option>
+                      <option value="LT">Lithuania</option>
+                      <option value="LU">Luxembourg</option>
+                      <option value="MT">Malta</option>
+                      <option value="NL">Netherlands</option>
+                      <option value="PL">Poland</option>
+                      <option value="PT">Portugal</option>
+                      <option value="RO">Romania</option>
+                      <option value="SK">Slovakia</option>
+                      <option value="SI">Slovenia</option>
+                      <option value="ES">Spain</option>
+                      <option value="SE">Sweden</option>
+                    </optgroup>
+                    <optgroup label="Australia & New Zealand">
+                      <option value="AU">Australia</option>
+                      <option value="NZ">New Zealand</option>
+                    </optgroup>
                   </select>
                   {country === 'GB' && (
                     <p className="text-xs text-amber-600">UK members require manual age verification for regulatory compliance</p>
                   )}
+                  <p className="text-xs text-muted-foreground">Service available in UK, EU, USA, Canada, Australia & New Zealand only</p>
                 </div>
 
                 <div className="space-y-2">
