@@ -1,3 +1,6 @@
+# Opposia Robots.txt
+# https://opposia.com
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /profile
+Disallow: /quiz
+
+# Sitemap
+Sitemap: https://opposia.com/sitemap.xml
