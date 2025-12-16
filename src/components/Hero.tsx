@@ -18,13 +18,13 @@ const Hero = () => {
         <img src={opposiaLogo} alt="Opposia" className="w-48 md:w-64 h-auto mx-auto mb-6" />
         
         <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
-          <span className="text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">Find someone who complements you,</span>
-          <span className="block text-black [text-shadow:_0_2px_15px_rgb(255_255_255_/_50%)]">
+          <span className="text-white [text-shadow:_0_2px_12px_rgb(0_0_0_/_60%),_0_4px_20px_rgb(0_0_0_/_40%)]">Find someone who complements you,</span>
+          <span className="block text-white [text-shadow:_0_2px_12px_rgb(0_0_0_/_60%),_0_4px_20px_rgb(0_0_0_/_40%)]">
             not another copy of you
           </span>
         </h1>
         
-        <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
+        <p className="text-lg md:text-xl mb-8 text-white max-w-2xl mx-auto leading-relaxed [text-shadow:_0_2px_10px_rgb(0_0_0_/_50%),_0_4px_15px_rgb(0_0_0_/_30%)]">
           The dating app that celebrates connections and creates perfect chemistry. Find your compatible match and discover love through meaningful relationships.
         </p>
         
