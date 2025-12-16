@@ -32,11 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <a href="#main-content" className="skip-to-main">
-            Skip to main content
-          </a>
           <Navigation />
-          <main id="main-content">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -61,7 +57,6 @@ const App = () => (
             <Route path="/cookie-settings" element={<CookieSettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </main>
           <CookieBanner />
         </AuthProvider>
       </BrowserRouter>

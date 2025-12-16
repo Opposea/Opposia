@@ -143,27 +143,4 @@ All colors MUST be HSL.
   .card-glow {
     @apply hover:shadow-magnetic transition-all duration-300;
   }
-
-  /* Skip to main content link for accessibility */
-  .skip-to-main {
-    @apply absolute left-1/2 -translate-x-1/2 -translate-y-full bg-primary text-primary-foreground px-4 py-2 rounded-b-md z-[100] font-medium transition-transform duration-200;
-  }
-  
-  .skip-to-main:focus {
-    @apply translate-y-0;
-  }
-
-  /* Enhanced focus indicators for accessibility */
-  *:focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring;
-  }
-
-  a:focus-visible,
-  button:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible,
-  [tabindex]:focus-visible {
-    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
-  }
 }
