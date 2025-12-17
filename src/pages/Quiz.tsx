@@ -112,6 +112,76 @@ const quizQuestions = [
       { value: "no", label: "No" },
       { value: "together", label: "Likes to do it together" }
     ]
+  },
+  {
+    id: "customer_service",
+    question: "Do you enjoy being the one who talks to customer service on the phone?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "making_bed",
+    question: "Do you make the bed in the morning?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "gardening",
+    question: "Do you enjoy gardening and outdoor yard work?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "packing_trips",
+    question: "Do you enjoy being the one who packs for trips?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "planning_birthdays",
+    question: "Do you enjoy being the one who plans for birthdays and holidays?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "picking_movies",
+    question: "Do you enjoy being the one who picks the movie or show to watch?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
+  },
+  {
+    id: "initiating_social",
+    question: "Do you enjoy being the one who initiates social plans with friends?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "sometimes", label: "Sometimes" },
+      { value: "no", label: "No" },
+      { value: "together", label: "Likes to do it together" }
+    ]
   }
 ];
 
