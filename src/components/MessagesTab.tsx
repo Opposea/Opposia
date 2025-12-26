@@ -13,6 +13,7 @@ import VideoCall from './VideoCall';
 import GiftSender from './GiftSender';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
+import AIConversationStarters from './AIConversationStarters';
 
 interface Message {
   id: string;
@@ -423,6 +424,15 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-muted/20">
+              {/* AI Conversation Starters - show at top when no messages */}
+              {messages.length === 0 && (
+                <AIConversationStarters
+                  matchUserId={getOtherUser(selectedMatch)}
+                  matchName={selectedMatch.profiles?.name || 'User'}
+                  onSelectStarter={(starter) => setNewMessage(starter)}
+                />
+              )}
+              
               {[...messages, ...gifts.map(gift => ({ ...gift, type: 'gift' }))]
                 .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
                 .map((item) => {
