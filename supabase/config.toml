@@ -11,3 +11,11 @@ verify_jwt = false
 # IP geolocation verification (public - called before auth)
 [functions.verify-location]
 verify_jwt = false
+
+# AI conversation starters based on quiz answers
+[functions.ai-conversation-starters]
+verify_jwt = true
+
+# AI profile writing assistant
+[functions.ai-profile-assistant]
+verify_jwt = true
