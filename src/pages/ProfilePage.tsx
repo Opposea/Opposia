@@ -35,7 +35,6 @@ import SwipeableMatchStack from '@/components/SwipeableMatchStack';
 import GiftSender from '@/components/GiftSender';
 import VideoCall from '@/components/VideoCall';
 import { VerificationSelfieUpload } from '@/components/VerificationSelfieUpload';
-import AIProfileAssistant from '@/components/AIProfileAssistant';
 import { z } from 'zod';
 import { useSearchParams } from 'react-router-dom';
 
@@ -1023,15 +1022,7 @@ const ProfilePage = () => {
                         />
                       </div>
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-medium">Bio</label>
-                          <AIProfileAssistant
-                            type="bio"
-                            currentBio={profileForm.bio}
-                            currentInterests={profileForm.interests?.split(',').map(i => i.trim()).filter(Boolean)}
-                            onApply={(value) => setProfileForm(prev => ({ ...prev, bio: value as string }))}
-                          />
-                        </div>
+                        <label className="text-sm font-medium block mb-2">Bio</label>
                         <Textarea
                           value={profileForm.bio}
                           onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
@@ -1043,15 +1034,7 @@ const ProfilePage = () => {
                         <p className="text-xs text-muted-foreground mt-1">{profileForm.bio?.length || 0}/500</p>
                       </div>
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-medium">Interests (comma separated)</label>
-                          <AIProfileAssistant
-                            type="interests"
-                            currentBio={profileForm.bio}
-                            currentInterests={profileForm.interests?.split(',').map(i => i.trim()).filter(Boolean)}
-                            onApply={(value) => setProfileForm(prev => ({ ...prev, interests: (value as string[]).join(', ') }))}
-                          />
-                        </div>
+                        <label className="text-sm font-medium block mb-2">Interests (comma separated)</label>
                         <Input
                           value={profileForm.interests}
                           onChange={(e) => setProfileForm(prev => ({ ...prev, interests: e.target.value }))}
