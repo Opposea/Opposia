@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Heart, Eye, EyeOff, Shield } from 'lucide-react';
+import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,9 +22,23 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [verifyingLocation, setVerifyingLocation] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>();
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
+  const { isLocked, getRemainingLockoutTime, recordFailedAttempt, resetOnSuccess, getAttemptsRemaining } = useAuthRateLimit();
+
+  // Check lockout status and update countdown
+  useEffect(() => {
+    const checkLockout = () => {
+      const remaining = getRemainingLockoutTime();
+      setLockoutSeconds(remaining);
+    };
+    
+    checkLockout();
+    const interval = setInterval(checkLockout, 1000);
+    return () => clearInterval(interval);
+  }, [getRemainingLockoutTime]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -131,6 +146,12 @@ const AuthPage = () => {
       return;
     }
 
+    // Check rate limiting before proceeding
+    if (isLocked()) {
+      toast.error(`Too many failed attempts. Please try again in ${Math.ceil(getRemainingLockoutTime() / 60)} minutes.`);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -149,12 +170,14 @@ const AuthPage = () => {
 
         result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country, captchaToken);
         if (!result.error) {
+          resetOnSuccess();
           const ukMessage = country === 'GB' ? ' For UK members, your age will be manually verified before you can access all features.' : '';
           toast.success(`Account created! Please check your email to verify your account before signing in.${ukMessage}`);
         }
       } else {
         result = await signIn(sanitizedEmail, password, captchaToken);
         if (!result.error) {
+          resetOnSuccess();
           toast.success('Welcome back!');
           // Get the current user after sign in
           const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -177,6 +200,18 @@ const AuthPage = () => {
       }
 
       if (result.error) {
+        // Record failed attempt for rate limiting (only for sign-in to prevent enumeration)
+        if (!isSignUp) {
+          const { locked, remainingAttempts } = recordFailedAttempt();
+          if (locked) {
+            toast.error('Too many failed attempts. Your account has been temporarily locked for 15 minutes.');
+            setLoading(false);
+            return;
+          } else if (remainingAttempts <= 2 && remainingAttempts > 0) {
+            toast.warning(`Warning: ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining before temporary lockout.`);
+          }
+        }
+
         if (result.error.message.includes('User already registered')) {
           toast.error('This email is already registered. Try signing in instead.');
         } else if (result.error.message.includes('Invalid login credentials')) {
@@ -195,7 +230,6 @@ const AuthPage = () => {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center p-4 pt-28">
@@ -220,6 +254,14 @@ const AuthPage = () => {
         </CardHeader>
         
         <CardContent>
+          {lockoutSeconds > 0 && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>
+                Too many failed attempts. Try again in {Math.floor(lockoutSeconds / 60)}:{(lockoutSeconds % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
@@ -366,8 +408,13 @@ const AuthPage = () => {
               </>
             )}
             
-            <Button type="submit" className="w-full" disabled={loading || verifyingLocation}>
-              {verifyingLocation ? (
+            <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
+              {lockoutSeconds > 0 ? (
+                <span className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Locked ({Math.floor(lockoutSeconds / 60)}:{(lockoutSeconds % 60).toString().padStart(2, '0')})
+                </span>
+              ) : verifyingLocation ? (
                 <span className="flex items-center gap-2">
                   <Shield className="w-4 h-4 animate-pulse" />
                   Verifying location...
