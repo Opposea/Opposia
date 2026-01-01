@@ -11,3 +11,7 @@ verify_jwt = false
 # IP geolocation verification (public - called before auth)
 [functions.verify-location]
 verify_jwt = false
+
+# Security headers endpoint
+[functions.security-headers]
+verify_jwt = false
