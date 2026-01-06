@@ -9,7 +9,9 @@ import CookieBanner from "./components/CookieBanner";
 import Index from "./pages/Index";
 import Quiz from "./pages/Quiz";
 import HowItWorksPage from "./pages/HowItWorksPage";
-
+import AboutPage from "./pages/AboutPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 import ProfilePage from "./pages/ProfilePage";
 import SuccessStoriesPage from "./pages/SuccessStoriesPage";
 import SafetyTipsPage from "./pages/SafetyTipsPage";
@@ -42,6 +44,9 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:postId" element={<BlogPostPage />} />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfilePage />

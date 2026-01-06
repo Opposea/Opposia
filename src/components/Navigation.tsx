@@ -27,7 +27,11 @@ const Navigation = () => {
         </Link>
 
         <div className="flex items-center space-x-4">
-          
+          <div className="hidden md:flex items-center space-x-4 mr-4">
+            <Link to="/about" className="text-white/90 hover:text-white text-sm font-medium transition-colors">About</Link>
+            <Link to="/blog" className="text-white/90 hover:text-white text-sm font-medium transition-colors">Blog</Link>
+            <Link to="/how-it-works" className="text-white/90 hover:text-white text-sm font-medium transition-colors">How It Works</Link>
+          </div>
           {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="User menu">
