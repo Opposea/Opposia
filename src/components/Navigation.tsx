@@ -22,8 +22,8 @@ const Navigation = () => {
   };
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary/90 to-secondary/90 backdrop-blur border-b border-primary/20">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center" aria-label="Opposia home">
-          <img src={opposiaLogo} alt="Opposia" className="h-16 w-auto object-contain" />
+        <Link to="/" className="flex items-center" aria-label="Opposites Attract home">
+          <img src={opposiaLogo} alt="Opposites Attract" className="h-16 w-auto object-contain" />
         </Link>
 
         <div className="flex items-center space-x-4">

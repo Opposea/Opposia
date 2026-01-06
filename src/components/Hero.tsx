@@ -15,7 +15,7 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">
         {/* Large Logo */}
-        <img src={opposiaLogo} alt="Opposia" className="w-48 md:w-64 h-auto mx-auto mb-6" />
+        <img src={opposiaLogo} alt="Opposites Attract" className="w-48 md:w-64 h-auto mx-auto mb-6" />
         
         <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
           <span className="text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">Find someone who complements you,</span>
