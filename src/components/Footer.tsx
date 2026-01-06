@@ -8,7 +8,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src={opposiaLogo} alt="Opposia" className="h-12 w-auto" />
+              <img src={opposiaLogo} alt="Opposites Attract" className="h-12 w-auto" />
               
               
             </div>
@@ -51,7 +51,7 @@ const Footer = () => {
         
         {/* Donation Section */}
         <div className="border-t border-background/20 pt-8 pb-8 text-center">
-          <p className="text-background/80 mb-4 text-lg">Support Opposia</p>
+          <p className="text-background/80 mb-4 text-lg">Support Opposites Attract</p>
           <a href="https://buy.stripe.com/4gM6oHayDe1G6Mk7BXgfu01" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="lg" className="bg-background/10 border-background/30 text-background hover:bg-background/20 gap-2">
               <Heart className="w-5 h-5 fill-current" />
