@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
+import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -23,6 +24,8 @@ const AuthPage = () => {
   const [verifyingLocation, setVerifyingLocation] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>();
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -152,6 +155,16 @@ const AuthPage = () => {
       return;
     }
 
+    // For signup, show terms dialog if not yet accepted
+    if (isSignUp && !termsAccepted) {
+      setShowTermsDialog(true);
+      return;
+    }
+
+    await processAuth(sanitizedEmail, sanitizedName);
+  };
+
+  const processAuth = async (sanitizedEmail: string, sanitizedName: string) => {
     setLoading(true);
 
     try {
@@ -438,6 +451,7 @@ const AuthPage = () => {
                   setConfirmPassword('');
                   setDateOfBirth('');
                   setCountry('');
+                  setTermsAccepted(false);
                 }}
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
@@ -452,6 +466,22 @@ const AuthPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <TermsOfServiceDialog
+        open={showTermsDialog}
+        onAccept={() => {
+          setShowTermsDialog(false);
+          setTermsAccepted(true);
+          // Re-submit the form after accepting
+          const sanitizedEmail = sanitizeInput(email);
+          const sanitizedName = sanitizeInput(name);
+          processAuth(sanitizedEmail, sanitizedName);
+        }}
+        onDecline={() => {
+          setShowTermsDialog(false);
+          toast.info('You must accept the Terms of Service to create an account.');
+        }}
+      />
     </div>
   );
 };
