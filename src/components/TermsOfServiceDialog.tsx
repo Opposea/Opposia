@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 
 interface TermsOfServiceDialogProps {
@@ -21,21 +20,27 @@ interface TermsOfServiceDialogProps {
 const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialogProps) => {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [hasAccepted, setHasAccepted] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setHasScrolledToBottom(false);
       setHasAccepted(false);
+      // Reset scroll position
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
     }
   }, [open]);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLDivElement;
-    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 20;
-    if (isAtBottom) {
-      setHasScrolledToBottom(true);
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
+      if (isAtBottom) {
+        setHasScrolledToBottom(true);
+      }
     }
   };
 
@@ -49,11 +54,12 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea 
-          className="flex-1 pr-4 max-h-[50vh] border rounded-md"
-          onScrollCapture={handleScroll}
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 max-h-[50vh] border rounded-md overflow-y-auto"
         >
-          <div ref={scrollRef} className="p-4 space-y-6">
+          <div className="p-4 space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Terms and Conditions</h3>
               <p className="text-sm text-muted-foreground">Last updated: March 2024</p>
@@ -131,7 +137,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         {!hasScrolledToBottom && (
           <p className="text-sm text-muted-foreground text-center py-2">
