@@ -13,7 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import ProfilePage from "./pages/ProfilePage";
-import SuccessStoriesPage from "./pages/SuccessStoriesPage";
+
 import SafetyTipsPage from "./pages/SafetyTipsPage";
 import HelpPage from "./pages/HelpPage";
 import ContactPage from "./pages/ContactPage";
@@ -52,7 +52,7 @@ const App = () => (
                 <ProfilePage />
               </ProtectedRoute>
             } />
-            <Route path="/success-stories" element={<SuccessStoriesPage />} />
+            
             <Route path="/safety-tips" element={<SafetyTipsPage />} />
             <Route path="/help-center" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />

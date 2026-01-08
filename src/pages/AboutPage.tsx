@@ -119,9 +119,9 @@ const AboutPage = () => {
                 Take the Quiz
               </Button>
             </Link>
-            <Link to="/success-stories">
+            <Link to="/how-it-works">
               <Button variant="outline" size="lg" className="text-lg px-8 bg-white/10 border-white/30 text-white hover:bg-white/20">
-                Read Success Stories
+                Learn How It Works
               </Button>
             </Link>
           </div>
