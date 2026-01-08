@@ -24,18 +24,9 @@ export function isValidLength(str: string, min: number, max: number): boolean {
   return length >= min && length <= max;
 }
 
-// Allowed countries: UK, EU, USA, Canada, Australia, New Zealand
+// Allowed countries: UK only
 export const ALLOWED_COUNTRIES = [
-  // UK
-  'GB',
-  // North America
-  'US', 'CA',
-  // EU countries
-  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 
-  'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 
-  'SI', 'ES', 'SE',
-  // Australia & New Zealand
-  'AU', 'NZ'
+  'GB' // United Kingdom
 ];
 
 // Explicitly blocked countries (for extra validation)

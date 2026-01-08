@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isAllowedCountry(country)) {
       return { 
         error: { 
-          message: 'Registration is not available in your country. Service is only available in UK, EU, USA, Canada, Australia, and New Zealand.' 
+          message: 'Registration is only available in the United Kingdom.' 
         } 
       };
     }
