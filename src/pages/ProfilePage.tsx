@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, User, MapPin, Calendar, Mail, RefreshCw, Search, Sparkles, Trash2, Ban, AlertCircle, Gift, Phone, Video, LayoutGrid, UserX, ShieldCheck } from 'lucide-react';
+import { Heart, MessageCircle, User, MapPin, Calendar, Mail, RefreshCw, Search, Sparkles, Trash2, Ban, AlertCircle, Gift, LayoutGrid, UserX, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -33,7 +33,7 @@ import PhotoGallery from '@/components/PhotoGallery';
 import EnlargedProfileView from '@/components/EnlargedProfileView';
 import SwipeableMatchStack from '@/components/SwipeableMatchStack';
 import GiftSender from '@/components/GiftSender';
-import VideoCall from '@/components/VideoCall';
+
 import { VerificationSelfieUpload } from '@/components/VerificationSelfieUpload';
 import { z } from 'zod';
 import { useSearchParams } from 'react-router-dom';
@@ -139,8 +139,6 @@ const ProfilePage = () => {
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [blockedUsersProfiles, setBlockedUsersProfiles] = useState<BlockedUserProfile[]>([]);
   const [selectedMatchForGift, setSelectedMatchForGift] = useState<Match | null>(null);
-  const [activeVideoCall, setActiveVideoCall] = useState<{matchId: string, profile: Profile} | null>(null);
-  const [activeAudioCall, setActiveAudioCall] = useState<{matchId: string, profile: Profile} | null>(null);
   const [showOnlyUnverified, setShowOnlyUnverified] = useState(false);
 
   const fetchQuizAnswers = async () => {
@@ -1334,36 +1332,6 @@ const ProfilePage = () => {
                                     <Gift className="w-4 h-4 mr-2" />
                                     Gift
                                   </Button>
-                                  <Button 
-                                    variant="outline"
-                                    className="border-primary/20 hover:bg-primary/10"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (match.profiles) {
-                                        setActiveAudioCall({ matchId: match.id, profile: match.profiles });
-                                        toast({
-                                          title: "Audio Call",
-                                          description: `Calling ${match.profiles.name}...`,
-                                        });
-                                      }
-                                    }}
-                                  >
-                                    <Phone className="w-4 h-4 mr-2" />
-                                    Call
-                                  </Button>
-                                  <Button 
-                                    variant="outline"
-                                    className="border-primary/20 hover:bg-primary/10"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (match.profiles) {
-                                        setActiveVideoCall({ matchId: match.id, profile: match.profiles });
-                                      }
-                                    }}
-                                  >
-                                    <Video className="w-4 h-4 mr-2" />
-                                    Video
-                                  </Button>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2 border-t border-primary/10">
@@ -1832,15 +1800,6 @@ const ProfilePage = () => {
         </div>
       )}
 
-      {/* Video Call Interface */}
-      {activeVideoCall && (
-        <div className="fixed inset-0 z-50 bg-background">
-          <VideoCall
-            isActive={true}
-            onEnd={() => setActiveVideoCall(null)}
-          />
-        </div>
-      )}
     </div>
   );
 };

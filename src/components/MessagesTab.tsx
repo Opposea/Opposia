@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Send, Video, Gift, Phone, Trash2, ArrowLeft } from 'lucide-react';
+import { Send, Gift, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import VideoCall from './VideoCall';
+
 import GiftSender from './GiftSender';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
@@ -58,8 +58,6 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
   const [unreadGiftsCount, setUnreadGiftsCount] = useState(0);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
-  const [incomingCall, setIncomingCall] = useState<{callerId: string, callerName: string} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -226,62 +224,11 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
     }
   };
 
-  const startVideoCall = async () => {
-    if (!selectedMatch || !user) return;
-
-    try {
-      const receiverId = selectedMatch.user1_id === user.id ? selectedMatch.user2_id : selectedMatch.user1_id;
-      
-      const { error } = await supabase
-        .from('video_calls')
-        .insert({
-          caller_id: user.id,
-          receiver_id: receiverId,
-          match_id: selectedMatch.id,
-          call_status: 'pending'
-        });
-
-      if (error) {
-        toast.error('Failed to start video call');
-        return;
-      }
-
-      setIsVideoCallActive(true);
-      toast.success('Video call started!');
-    } catch (error) {
-      toast.error('An error occurred while starting the video call');
-    }
-  };
 
   const getOtherUser = (match: Match) => {
     return match.user1_id === user?.id ? match.user2_id : match.user1_id;
   };
 
-  if (isVideoCallActive) {
-    return (
-      <div className="h-96">
-        <VideoCall
-          isActive={true}
-          onEnd={() => setIsVideoCallActive(false)}
-        />
-      </div>
-    );
-  }
-
-  if (incomingCall) {
-    return (
-      <VideoCall
-        isIncoming={true}
-        callerId={incomingCall.callerId}
-        callerName={incomingCall.callerName}
-        onAccept={() => {
-          setIncomingCall(null);
-          setIsVideoCallActive(true);
-        }}
-        onReject={() => setIncomingCall(null)}
-      />
-    );
-  }
 
   return (
     <Card className="flex flex-col md:flex-row h-[700px] shadow-elegant overflow-hidden">
@@ -378,23 +325,6 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
               </div>
               <TooltipProvider>
                 <div className="flex gap-1 md:gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        onClick={startVideoCall} 
-                        variant="outline" 
-                        size="sm"
-                        className="hover:bg-primary/10 gap-1 md:gap-2 px-2 md:px-4"
-                      >
-                        <Video className="w-4 h-4" />
-                        <span className="hidden lg:inline text-xs md:text-sm">Video Call</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Start a video call with {selectedMatch.profiles?.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="relative">
