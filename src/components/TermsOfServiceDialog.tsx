@@ -20,6 +20,7 @@ interface TermsOfServiceDialogProps {
 const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialogProps) => {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [hasAccepted, setHasAccepted] = useState(false);
+  const [hasConsentedOrientation, setHasConsentedOrientation] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset state when dialog opens
@@ -27,6 +28,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
     if (open) {
       setHasScrolledToBottom(false);
       setHasAccepted(false);
+      setHasConsentedOrientation(false);
       // Reset scroll position
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
@@ -116,21 +118,35 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
               </div>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-foreground mb-2">8. Limitation of Liability</h4>
+                <h4 className="font-semibold text-foreground mb-2">8. Sexual Orientation Data Processing</h4>
+                <p className="text-sm text-muted-foreground">
+                  Processing of your sexual orientation is essential for showing you potential matches within your stated preference. This special category data is collected and processed solely for the purpose of providing you with relevant matching services. Without this information, we cannot provide our core matchmaking functionality. By using our service, you explicitly consent to the processing of your sexual orientation data for these purposes.
+                </p>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold text-foreground mb-2">9. User Vigilance and Responsibility</h4>
+                <p className="text-sm text-muted-foreground">
+                  We can only take action if a user reports abuse, harassment, bot activity, or scammers. It is entirely up to the user to be vigilant. By agreeing to these Terms of Service, you agree that you are in sound mind to make such judgments independently. We encourage all users to report any suspicious activity, but the responsibility for personal safety and judgment when interacting with other users remains with you.
+                </p>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold text-foreground mb-2">10. Limitation of Liability</h4>
                 <p className="text-sm text-muted-foreground">
                   To the fullest extent permitted by law, we are not liable for any direct, indirect, incidental, special, consequential, or punitive damages arising from your use of our service or from any interactions with other users. This includes but is not limited to damages for loss of profits, data, or other intangible losses.
                 </p>
               </div>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-foreground mb-2">9. Dispute Resolution</h4>
+                <h4 className="font-semibold text-foreground mb-2">11. Dispute Resolution</h4>
                 <p className="text-sm text-muted-foreground">
                   Any disputes arising from these terms or your use of our service shall be governed by the laws of England and Wales. You agree to submit to the exclusive jurisdiction of the courts of England and Wales for the resolution of any disputes.
                 </p>
               </div>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-foreground mb-2">10. Contact Information</h4>
+                <h4 className="font-semibold text-foreground mb-2">12. Contact Information</h4>
                 <p className="text-sm text-muted-foreground">
                   For questions about these terms, please contact us at legal@oppositesattract.com. We will endeavor to respond to all inquiries within a reasonable timeframe.
                 </p>
@@ -146,15 +162,29 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
         )}
 
         {hasScrolledToBottom && (
-          <div className="flex items-center space-x-2 py-2">
-            <Checkbox 
-              id="accept-terms" 
-              checked={hasAccepted}
-              onCheckedChange={(checked) => setHasAccepted(checked === true)}
-            />
-            <Label htmlFor="accept-terms" className="text-sm cursor-pointer">
-              I have read and agree to the Terms of Service and Privacy Policy
-            </Label>
+          <div className="space-y-3 py-2">
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="accept-terms" 
+                checked={hasAccepted}
+                onCheckedChange={(checked) => setHasAccepted(checked === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="accept-terms" className="text-sm cursor-pointer leading-tight">
+                I have read and agree to the Terms of Service and Privacy Policy
+              </Label>
+            </div>
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="consent-orientation" 
+                checked={hasConsentedOrientation}
+                onCheckedChange={(checked) => setHasConsentedOrientation(checked === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="consent-orientation" className="text-sm cursor-pointer leading-tight">
+                I explicitly consent to my sexual orientation being processed to provide me with relevant matches
+              </Label>
+            </div>
           </div>
         )}
 
@@ -164,7 +194,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
           </Button>
           <Button 
             onClick={onAccept} 
-            disabled={!hasScrolledToBottom || !hasAccepted}
+            disabled={!hasScrolledToBottom || !hasAccepted || !hasConsentedOrientation}
           >
             Accept & Continue
           </Button>

@@ -37,6 +37,7 @@ const PrivacyPage = () => {
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground space-y-2">
                   <li><strong>Information You Provide:</strong> Your email address, sexual preferences, sexuality, gender, age verification, location and profile picture all of which essential for the sites functionality for matchmaking.</li>
+                  <li><strong>Sexual Orientation Data:</strong> Processing of your sexual orientation is essential for showing you potential matches within your stated preference. This special category data under UK GDPR is collected with your explicit consent and processed solely for providing relevant matching services. Without this information, we cannot provide our core matchmaking functionality.</li>
                   <li><strong>Information Collected Automatically:</strong> When you visit our site, we may automatically collect limited technical data such as your IP address, browser type, and pages visited. This is standard for most web servers and may be used for security and basic operational purposes.</li>
                 </ul>
               </div>
