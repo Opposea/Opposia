@@ -9,6 +9,7 @@ import { Send, Gift, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { sanitizeInput, escapeHtml } from '@/lib/security';
 
 import GiftSender from './GiftSender';
 import OnlineIndicator from './OnlineIndicator';
@@ -157,12 +158,13 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
   };
 
   const sendMessage = async () => {
-    const trimmedMessage = newMessage.trim();
+    // Sanitize input to prevent XSS
+    const sanitizedMessage = sanitizeInput(newMessage, 2000);
     
     // Validate message
-    if (!trimmedMessage || !selectedMatch || !user) return;
+    if (!sanitizedMessage || !selectedMatch || !user) return;
     
-    if (trimmedMessage.length > 2000) {
+    if (sanitizedMessage.length > 2000) {
       toast.error("Message is too long (max 2000 characters)");
       return;
     }
@@ -172,7 +174,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
       const { data, error } = await supabase
         .from('messages')
         .insert({
-          content: trimmedMessage,
+          content: sanitizedMessage,
           sender_id: user.id,
           match_id: selectedMatch.id
         })
