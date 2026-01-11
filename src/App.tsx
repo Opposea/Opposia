@@ -21,6 +21,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import CookieSettingsPage from "./pages/CookieSettingsPage";
+import OAuthConsentPage from "./pages/OAuthConsentPage";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -60,6 +61,8 @@ const App = () => (
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/cookie-settings" element={<CookieSettingsPage />} />
+            <Route path="/oauth/consent" element={<OAuthConsentPage />} />
+            <Route path="*" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieBanner />
