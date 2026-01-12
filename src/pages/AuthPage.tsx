@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
+import { TurnstileCaptcha } from '@/components/TurnstileCaptcha';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -152,6 +153,12 @@ const AuthPage = () => {
     // Check rate limiting before proceeding
     if (isLocked()) {
       toast.error(`Too many failed attempts. Please try again in ${Math.ceil(getRemainingLockoutTime() / 60)} minutes.`);
+      return;
+    }
+
+    // Require captcha verification
+    if (!captchaToken) {
+      toast.error('Please complete the security verification.');
       return;
     }
 
@@ -420,6 +427,15 @@ const AuthPage = () => {
                 </div>
               </>
             )}
+
+            <TurnstileCaptcha
+              onVerify={useCallback((token: string) => setCaptchaToken(token), [])}
+              onExpire={useCallback(() => setCaptchaToken(undefined), [])}
+              onError={useCallback(() => {
+                setCaptchaToken(undefined);
+                toast.error('Captcha verification failed. Please try again.');
+              }, [])}
+            />
             
             <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
               {lockoutSeconds > 0 ? (
