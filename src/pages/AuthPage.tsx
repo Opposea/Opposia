@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
 
+declare global {
+  interface Window {
+    grecaptcha: {
+      ready: (callback: () => void) => void;
+      render: (container: string | HTMLElement, options: {
+        sitekey: string;
+        callback: (token: string) => void;
+        'expired-callback': () => void;
+      }) => number;
+      reset: (widgetId?: number) => void;
+      getResponse: (widgetId?: number) => string;
+    };
+    onRecaptchaLoad?: () => void;
+  }
+}
+
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -22,10 +38,12 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifyingLocation, setVerifyingLocation] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string>();
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [recaptchaWidgetId, setRecaptchaWidgetId] = useState<number | null>(null);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +60,42 @@ const AuthPage = () => {
     const interval = setInterval(checkLockout, 1000);
     return () => clearInterval(interval);
   }, [getRemainingLockoutTime]);
+
+  // Initialize reCAPTCHA
+  useEffect(() => {
+    const initRecaptcha = () => {
+      if (window.grecaptcha && document.getElementById('recaptcha-container')) {
+        try {
+          const widgetId = window.grecaptcha.render('recaptcha-container', {
+            sitekey: '6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b',
+            callback: (token: string) => {
+              setCaptchaToken(token);
+            },
+            'expired-callback': () => {
+              setCaptchaToken(undefined);
+            }
+          });
+          setRecaptchaWidgetId(widgetId);
+          setRecaptchaReady(true);
+        } catch (e) {
+          // Widget might already be rendered
+          console.log('reCAPTCHA already rendered or error:', e);
+        }
+      }
+    };
+
+    // Check if grecaptcha is already loaded
+    if (window.grecaptcha) {
+      window.grecaptcha.ready(initRecaptcha);
+    } else {
+      // Wait for script to load
+      window.onRecaptchaLoad = initRecaptcha;
+    }
+
+    return () => {
+      window.onRecaptchaLoad = undefined;
+    };
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -421,7 +475,7 @@ const AuthPage = () => {
               </>
             )}
             
-            <div className="g-recaptcha mb-4" data-sitekey="6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b"></div>
+            <div id="recaptcha-container" className="mb-4"></div>
             
             <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
               {lockoutSeconds > 0 ? (
