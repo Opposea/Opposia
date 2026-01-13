@@ -222,6 +222,28 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
+      // Verify reCAPTCHA first
+      if (!captchaToken) {
+        toast.error('Please complete the reCAPTCHA verification');
+        setLoading(false);
+        return;
+      }
+
+      const { data: recaptchaResult, error: recaptchaError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { token: captchaToken }
+      });
+
+      if (recaptchaError || !recaptchaResult?.success) {
+        toast.error('reCAPTCHA verification failed. Please try again.');
+        // Reset the captcha
+        if (recaptchaWidgetId !== null && window.grecaptcha) {
+          window.grecaptcha.reset(recaptchaWidgetId);
+        }
+        setCaptchaToken(undefined);
+        setLoading(false);
+        return;
+      }
+
       let result;
       if (isSignUp) {
         // Verify location before signup
@@ -235,14 +257,14 @@ const AuthPage = () => {
           return;
         }
 
-        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country, captchaToken);
+        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country);
         if (!result.error) {
           resetOnSuccess();
           const ukMessage = country === 'GB' ? ' For UK members, your age will be manually verified before you can access all features.' : '';
           toast.success(`Account created! Please check your email to verify your account before signing in.${ukMessage}`);
         }
       } else {
-        result = await signIn(sanitizedEmail, password, captchaToken);
+        result = await signIn(sanitizedEmail, password);
         if (!result.error) {
           resetOnSuccess();
           toast.success('Welcome back!');
