@@ -421,6 +421,8 @@ const AuthPage = () => {
               </>
             )}
             
+            <div className="g-recaptcha mb-4" data-sitekey="6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b"></div>
+            
             <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
