@@ -15,3 +15,7 @@ verify_jwt = false
 # Security headers endpoint
 [functions.security-headers]
 verify_jwt = false
+
+# reCAPTCHA verification (public - called before auth)
+[functions.verify-recaptcha]
+verify_jwt = false
