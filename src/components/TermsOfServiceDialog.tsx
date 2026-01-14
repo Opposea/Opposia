@@ -71,7 +71,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold text-foreground mb-2">1. Acceptance of Terms</h4>
                 <p className="text-sm text-muted-foreground">
-                  By accessing and using Opposites Attract, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, please do not use our service. These terms constitute a legally binding agreement between you and Opposites Attract.
+                  By accessing and using Opposia, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, please do not use our service. These terms constitute a legally binding agreement between you and Opposia Ltd.
                 </p>
               </div>
 
@@ -148,7 +148,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold text-foreground mb-2">12. Contact Information</h4>
                 <p className="text-sm text-muted-foreground">
-                  For questions about these terms, please contact us at legal@oppositesattract.com. We will endeavor to respond to all inquiries within a reasonable timeframe.
+                  For questions about these terms, please contact us at legal@opposia.com. We will endeavor to respond to all inquiries within a reasonable timeframe.
                 </p>
               </div>
             </div>

@@ -66,10 +66,10 @@ const BlogPage = () => {
       <div className="bg-gradient-hero py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Opposites Attract Blog
+            Opposia Blog
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Insights, tips, and stories about finding love through complementary connections.
+            Insights, tips, and stories about matching on life and creating a better you.
           </p>
         </div>
       </div>
