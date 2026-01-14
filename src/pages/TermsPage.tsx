@@ -32,7 +32,7 @@ const TermsPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">1. Agreement to These Terms</h3>
                 <div className="space-y-3 text-muted-foreground">
-                  <p><strong>1.1</strong> Opposia Ltd ("Opposia", "we", "us", "our") provides the Opposia website, apps, and related services (the "Service").</p>
+                  <p><strong>1.1</strong> Opposia Ltd (Company No. 16955158) ("Opposia", "we", "us", "our") provides the Opposia website, apps, and related services (the "Service").</p>
                   <p><strong>1.2</strong> By accessing or using the Service you agree to these Terms, our Privacy Policy, Acceptable Use Policy, Safety & Moderation Policy, and Refund Policy (together, the "Agreement"). If you do not agree, do not use the Service.</p>
                   <p><strong>1.3</strong> These Terms form a legally binding contract between you and Opposia Ltd.</p>
                   <p><strong>1.4</strong> If you use the Service on behalf of a business or other entity, you confirm you have authority to bind that entity, and "you" includes that entity.</p>
