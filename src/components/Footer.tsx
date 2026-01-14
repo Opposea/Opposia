@@ -69,7 +69,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-background/60 text-sm">
-            © 2024 Opposia Ltd. All rights reserved.
+            © 2026 Opposia Ltd. All rights reserved.
           </p>
           <p className="text-background/60 text-sm flex items-center gap-1">
             Made with <Heart className="w-4 h-4 text-secondary fill-secondary" /> for finding love
