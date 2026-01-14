@@ -14,45 +14,19 @@ import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
 declare global {
   interface Window {
     grecaptcha: {
-      ready: (callback: () => void) => void;
-      render: (
-        container: string | HTMLElement,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          'expired-callback': () => void;
-        }
-      ) => number;
-      execute: (siteKey: string, options: { action: string }) => Promise<string>;
-      reset: (widgetId?: number) => void;
-      getResponse: (widgetId?: number) => string;
+      enterprise: {
+        ready: (callback: () => void) => void;
+        execute: (siteKey: string, options: { action: string }) => Promise<string>;
+      };
     };
+    grecaptchaReady: Promise<{
+      ready: (callback: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    }>;
   }
 }
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? '';
-const RECAPTCHA_MODE = (import.meta.env.VITE_RECAPTCHA_MODE ?? 'v3') as 'v3' | 'v2_checkbox';
-
-const loadRecaptchaScript = (mode: typeof RECAPTCHA_MODE, siteKey: string) => {
-  const existing = document.getElementById('recaptcha-script');
-  if (existing) return Promise.resolve();
-
-  const script = document.createElement('script');
-  script.id = 'recaptcha-script';
-  script.async = true;
-  script.defer = true;
-  script.src =
-    mode === 'v3'
-      ? `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`
-      : 'https://www.google.com/recaptcha/api.js?render=explicit';
-
-  document.head.appendChild(script);
-
-  return new Promise<void>((resolve, reject) => {
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load reCAPTCHA'));
-  });
-};
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? '6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -65,11 +39,9 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifyingLocation, setVerifyingLocation] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [recaptchaWidgetId, setRecaptchaWidgetId] = useState<number | null>(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
   
   const { signUp, signIn, user } = useAuth();
@@ -88,7 +60,7 @@ const AuthPage = () => {
     return () => clearInterval(interval);
   }, [getRemainingLockoutTime]);
 
-  // Initialize reCAPTCHA (v3 or v2 checkbox)
+  // Initialize reCAPTCHA Enterprise (loaded via index.html)
   useEffect(() => {
     let cancelled = false;
 
@@ -98,35 +70,15 @@ const AuthPage = () => {
         return;
       }
 
-      await loadRecaptchaScript(RECAPTCHA_MODE, RECAPTCHA_SITE_KEY);
+      // Wait for the Enterprise script to load (promise set in index.html)
+      await window.grecaptchaReady;
       if (cancelled) return;
-
-      if (!window.grecaptcha) {
-        throw new Error('grecaptcha not available after script load');
-      }
-
-      window.grecaptcha.ready(() => {
-        if (cancelled) return;
-
-        if (RECAPTCHA_MODE === 'v2_checkbox') {
-          const container = document.getElementById('recaptcha-container');
-          if (!container) return;
-
-          const widgetId = window.grecaptcha.render(container, {
-            sitekey: RECAPTCHA_SITE_KEY,
-            callback: (token: string) => setCaptchaToken(token),
-            'expired-callback': () => setCaptchaToken(undefined),
-          });
-
-          setRecaptchaWidgetId(widgetId);
-        }
-
-        setRecaptchaReady(true);
-      });
+      
+      setRecaptchaReady(true);
     };
 
     init().catch((e) => {
-      console.error('reCAPTCHA init failed:', e);
+      console.error('reCAPTCHA Enterprise init failed:', e);
       setRecaptchaReady(false);
     });
 
@@ -260,20 +212,17 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      if (!recaptchaReady || !window.grecaptcha || !RECAPTCHA_SITE_KEY) {
+      if (!recaptchaReady || !window.grecaptcha?.enterprise || !RECAPTCHA_SITE_KEY) {
         toast.error('reCAPTCHA is not ready yet. Please refresh and try again.');
         setLoading(false);
         return;
       }
 
       const action = isSignUp ? 'signup' : 'signin';
-      const token =
-        RECAPTCHA_MODE === 'v3'
-          ? await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
-          : captchaToken;
+      const token = await window.grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action });
 
       if (!token) {
-        toast.error('Please complete the reCAPTCHA verification');
+        toast.error('reCAPTCHA verification failed. Please try again.');
         setLoading(false);
         return;
       }
@@ -284,11 +233,6 @@ const AuthPage = () => {
 
       if (recaptchaError || !recaptchaResult?.success) {
         toast.error('reCAPTCHA verification failed. Please try again.');
-        // Reset the captcha (v2 only)
-        if (RECAPTCHA_MODE === 'v2_checkbox' && recaptchaWidgetId !== null && window.grecaptcha) {
-          window.grecaptcha.reset(recaptchaWidgetId);
-        }
-        setCaptchaToken(undefined);
         setLoading(false);
         return;
       }
@@ -544,9 +488,6 @@ const AuthPage = () => {
                   />
                 </div>
               </>
-            )}
-            {RECAPTCHA_MODE === 'v2_checkbox' && (
-              <div id="recaptcha-container" className="mb-4" />
             )}
             
             <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
