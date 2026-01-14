@@ -9,10 +9,10 @@ const AboutPage = () => {
       <div className="bg-gradient-hero py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            About Opposia
+            About Opposites Attract
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            We match on life—values, goals, and personality—to create lasting connections.
+            The dating app that celebrates differences and creates lasting connections through complementary personalities.
           </p>
         </div>
       </div>
@@ -25,15 +25,15 @@ const AboutPage = () => {
             
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
               <p>
-                Opposia was founded on a simple but powerful observation: the most successful relationships often bring together people with complementary personalities, not identical ones. While traditional dating apps focus on matching people who are similar, we took a different approach.
+                Opposites Attract was founded on a simple but powerful observation: the most successful relationships often bring together people with complementary personalities, not identical ones. While traditional dating apps focus on matching people who are similar, we took a different approach.
               </p>
               
               <p>
-                Our team of relationship experts, psychologists, and technologists came together to build matching that prioritises real life compatibility—values, goals, and personality.
+                Our team of relationship experts, psychologists, and technologists came together to create an algorithm that understands the nuances of personality compatibility. We believe that an introvert and an extrovert, a planner and a spontaneous adventurer, or a dreamer and a pragmatist can create something beautiful together—filling in each other's gaps and growing through their differences.
               </p>
               
               <p>
-                Since our launch, thousands of couples have found meaningful connections through Opposia. Our success stories speak for themselves: partners who challenge each other, complement each other, and build stronger relationships because of their differences, not despite them.
+                Since our launch, thousands of couples have found meaningful connections through Opposites Attract. Our success stories speak for themselves: partners who challenge each other, complement each other, and build stronger relationships because of their differences, not despite them.
               </p>
             </div>
           </div>
@@ -85,7 +85,7 @@ const AboutPage = () => {
       <section className="py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-8">The Science Behind Opposia</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-8">The Science Behind Opposites Attract</h2>
             
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
               <p>
@@ -108,7 +108,7 @@ const AboutPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to match on life?
+            Ready to Find Your Opposite?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Take our compatibility quiz and discover the person who complements you perfectly.

@@ -143,7 +143,7 @@ const SafetyTipsPage = () => {
             <Card className="p-6">
               <h3 className="font-bold mb-2">24/7 Support</h3>
               <p className="text-sm text-muted-foreground">
-                Contact our safety team anytime at safety@opposia.com
+                Contact our safety team anytime at safety@oppositesattract.com
               </p>
             </Card>
           </div>

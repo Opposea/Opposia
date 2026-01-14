@@ -42,7 +42,7 @@ const blogPosts = [
   {
     id: "personality-compatibility-quiz-guide",
     title: "Understanding Your Personality Compatibility Quiz Results",
-    excerpt: "A deep dive into what your Opposia quiz results mean and how to use them to find your perfect match.",
+    excerpt: "A deep dive into what your Opposites Attract quiz results mean and how to use them to find your perfect match.",
     author: "Lisa Anderson",
     date: "December 10, 2025",
     category: "App Guide",
@@ -66,10 +66,10 @@ const BlogPage = () => {
       <div className="bg-gradient-hero py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Opposia Blog
+            Opposites Attract Blog
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Insights, tips, and stories about matching on life.
+            Insights, tips, and stories about finding love through complementary connections.
           </p>
         </div>
       </div>
@@ -161,7 +161,7 @@ const BlogPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to match on life?
+            Ready to Find Your Opposite?
           </h2>
           <p className="text-xl text-white/90 mb-8">
             Take our compatibility quiz and start your journey today.

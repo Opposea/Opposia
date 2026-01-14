@@ -6,8 +6,8 @@ import { isAllowedCountry } from '@/lib/validation';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signUp: (email: string, password: string, name: string, dateOfBirth: string, country: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string, dateOfBirth: string, country: string, captchaToken?: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<{ error: any }>;
   signInWithProvider: (provider: 'facebook' | 'twitter') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string, dateOfBirth: string, country: string) => {
+  const signUp = async (email: string, password: string, name: string, dateOfBirth: string, country: string, captchaToken?: string) => {
     // Validate country before attempting signup
     if (!isAllowedCountry(country)) {
       return { 
@@ -69,17 +69,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: name,
           date_of_birth: dateOfBirth,
           country: country
-        }
+        },
+        captchaToken
       }
     });
     
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
+      options: {
+        captchaToken
+      }
     });
     
     return { error };

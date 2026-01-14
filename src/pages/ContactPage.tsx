@@ -30,7 +30,7 @@ const ContactPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-3">Customer Support</h3>
                 <p className="text-muted-foreground">
-                  Email: support@opposia.com<br />
+                  Email: support@oppositesattract.com<br />
                   Phone: 1-800-OPPOSITE<br />
                   Hours: Monday-Friday, 9AM-6PM EST
                 </p>
@@ -39,21 +39,21 @@ const ContactPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-3">Business Inquiries</h3>
                 <p className="text-muted-foreground">
-                  Email: business@opposia.com
+                  Email: business@oppositesattract.com
                 </p>
               </div>
 
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-3">Press & Media</h3>
                 <p className="text-muted-foreground">
-                  Email: press@opposia.com
+                  Email: press@oppositesattract.com
                 </p>
               </div>
 
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-3">Mailing Address</h3>
                 <p className="text-muted-foreground">
-                  Opposia Ltd<br />
+                  Opposites Attract Inc.<br />
                   123 Love Street<br />
                   Romance City, RC 12345
                 </p>

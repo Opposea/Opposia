@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 const Testimonials = () => {
   const testimonials = [{
     name: "Sarah & Mike",
-    story: "I'm a quiet introvert who loves books, he's an adventurous extrovert who loves rock climbing. Opposia showed us that our differences make us stronger together!",
+    story: "I'm a quiet introvert who loves books, he's an adventurous extrovert who loves rock climbing. Opposites Attract showed us that our differences make us stronger together!",
     months: "Together 8 months",
     rating: 5
   }, {

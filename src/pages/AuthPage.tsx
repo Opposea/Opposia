@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,24 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
 
-declare global {
-  interface Window {
-    grecaptcha: {
-      enterprise: {
-        ready: (callback: () => void) => void;
-        execute: (siteKey: string, options: { action: string }) => Promise<string>;
-      };
-    };
-    grecaptchaReady: Promise<{
-      ready: (callback: () => void) => void;
-      execute: (siteKey: string, options: { action: string }) => Promise<string>;
-    }>;
-  }
-}
-
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? '6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b';
-const RECAPTCHA_ACTION = import.meta.env.VITE_RECAPTCHA_ACTION ?? 'auth';
-
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -40,10 +22,10 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifyingLocation, setVerifyingLocation] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>();
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [recaptchaReady, setRecaptchaReady] = useState(false);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -60,33 +42,6 @@ const AuthPage = () => {
     const interval = setInterval(checkLockout, 1000);
     return () => clearInterval(interval);
   }, [getRemainingLockoutTime]);
-
-  // Initialize reCAPTCHA Enterprise (loaded via index.html)
-  useEffect(() => {
-    let cancelled = false;
-
-    const init = async () => {
-      if (!RECAPTCHA_SITE_KEY) {
-        console.error('Missing VITE_RECAPTCHA_SITE_KEY');
-        return;
-      }
-
-      // Wait for the Enterprise script to load (promise set in index.html)
-      await window.grecaptchaReady;
-      if (cancelled) return;
-      
-      setRecaptchaReady(true);
-    };
-
-    init().catch((e) => {
-      console.error('reCAPTCHA Enterprise init failed:', e);
-      setRecaptchaReady(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -213,41 +168,6 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // 1) Wait for Enterprise grecaptcha to be ready (with timeout)
-      const grecaptchaEnterprise = await Promise.race([
-        window.grecaptchaReady,
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('reCAPTCHA Enterprise load timeout')), 7000)
-        ),
-      ]);
-      if (!grecaptchaEnterprise || !RECAPTCHA_SITE_KEY) {
-        toast.error('reCAPTCHA is not ready yet. Please refresh and try again.');
-        setLoading(false);
-        return;
-      }
-
-      // 2) Execute reCAPTCHA Enterprise with action "auth"
-      const token = await grecaptchaEnterprise.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION });
-
-      if (!token) {
-        toast.error('reCAPTCHA verification failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      // 3) Verify token via Enterprise edge function
-      const { data: recaptchaResult, error: recaptchaError } = await supabase.functions.invoke('verify-recaptcha-enterprise', {
-        body: { token, action: RECAPTCHA_ACTION }
-      });
-
-      if (recaptchaError || !recaptchaResult?.success) {
-        const scoreInfo = recaptchaResult?.score !== undefined ? ` (score: ${recaptchaResult.score})` : '';
-        console.log('reCAPTCHA Enterprise verification failed:', recaptchaResult, recaptchaError);
-        toast.error(`reCAPTCHA verification failed${scoreInfo}. Please try again.`);
-        setLoading(false);
-        return;
-      }
-
       let result;
       if (isSignUp) {
         // Verify location before signup
@@ -261,14 +181,14 @@ const AuthPage = () => {
           return;
         }
 
-        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country);
+        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country, captchaToken);
         if (!result.error) {
           resetOnSuccess();
           const ukMessage = country === 'GB' ? ' For UK members, your age will be manually verified before you can access all features.' : '';
           toast.success(`Account created! Please check your email to verify your account before signing in.${ukMessage}`);
         }
       } else {
-        result = await signIn(sanitizedEmail, password);
+        result = await signIn(sanitizedEmail, password, captchaToken);
         if (!result.error) {
           resetOnSuccess();
           toast.success('Welcome back!');
