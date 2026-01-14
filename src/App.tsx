@@ -16,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 
 import SafetyTipsPage from "./pages/SafetyTipsPage";
 import SafetyModerationPolicyPage from "./pages/SafetyModerationPolicyPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
 import HelpPage from "./pages/HelpPage";
 import ContactPage from "./pages/ContactPage";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -57,6 +58,7 @@ const App = () => (
             
             <Route path="/safety-tips" element={<SafetyTipsPage />} />
             <Route path="/safety-moderation-policy" element={<SafetyModerationPolicyPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
             <Route path="/help-center" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
