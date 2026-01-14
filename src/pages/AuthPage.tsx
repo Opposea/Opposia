@@ -213,9 +213,13 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // 1) Wait for Enterprise grecaptcha to be ready
-      const grecaptchaEnterprise = await window.grecaptchaReady;
-      
+      // 1) Wait for Enterprise grecaptcha to be ready (with timeout)
+      const grecaptchaEnterprise = await Promise.race([
+        window.grecaptchaReady,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('reCAPTCHA Enterprise load timeout')), 7000)
+        ),
+      ]);
       if (!grecaptchaEnterprise || !RECAPTCHA_SITE_KEY) {
         toast.error('reCAPTCHA is not ready yet. Please refresh and try again.');
         setLoading(false);
