@@ -31,7 +31,8 @@ serve(async (req) => {
       );
     }
 
-    // Verify the token with Google
+    // For reCAPTCHA Enterprise, we use the standard siteverify endpoint
+    // The secret key for Enterprise works the same way
     const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
     const formData = new URLSearchParams();
     formData.append('secret', secretKey);
@@ -46,6 +47,7 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('reCAPTCHA Enterprise verify response:', JSON.stringify(data));
 
     if (!data.success) {
       console.log('reCAPTCHA verification failed:', data['error-codes']);
@@ -59,7 +61,7 @@ serve(async (req) => {
       );
     }
 
-    // reCAPTCHA v3 returns score + action. If present, validate them.
+    // reCAPTCHA Enterprise returns score + action. If present, validate them.
     if (typeof data.score === 'number') {
       const scoreOk = data.score >= 0.5;
       const actionOk = !action || data.action === action;
@@ -83,7 +85,7 @@ serve(async (req) => {
       );
     }
 
-    // reCAPTCHA v2: success only
+    // Success without score (fallback)
     return new Response(
       JSON.stringify({ success: true }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
