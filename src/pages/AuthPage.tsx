@@ -27,6 +27,7 @@ declare global {
 }
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? '6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b';
+const RECAPTCHA_ACTION = import.meta.env.VITE_RECAPTCHA_ACTION ?? 'auth';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -212,14 +213,17 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      if (!recaptchaReady || !window.grecaptcha?.enterprise || !RECAPTCHA_SITE_KEY) {
+      // 1) Wait for Enterprise grecaptcha to be ready
+      const grecaptchaEnterprise = await window.grecaptchaReady;
+      
+      if (!grecaptchaEnterprise || !RECAPTCHA_SITE_KEY) {
         toast.error('reCAPTCHA is not ready yet. Please refresh and try again.');
         setLoading(false);
         return;
       }
 
-      const action = isSignUp ? 'signup' : 'signin';
-      const token = await window.grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action });
+      // 2) Execute reCAPTCHA Enterprise with action "auth"
+      const token = await grecaptchaEnterprise.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION });
 
       if (!token) {
         toast.error('reCAPTCHA verification failed. Please try again.');
@@ -227,12 +231,15 @@ const AuthPage = () => {
         return;
       }
 
-      const { data: recaptchaResult, error: recaptchaError } = await supabase.functions.invoke('verify-recaptcha', {
-        body: { token, action }
+      // 3) Verify token via Enterprise edge function
+      const { data: recaptchaResult, error: recaptchaError } = await supabase.functions.invoke('verify-recaptcha-enterprise', {
+        body: { token, action: RECAPTCHA_ACTION }
       });
 
       if (recaptchaError || !recaptchaResult?.success) {
-        toast.error('reCAPTCHA verification failed. Please try again.');
+        const scoreInfo = recaptchaResult?.score !== undefined ? ` (score: ${recaptchaResult.score})` : '';
+        console.log('reCAPTCHA Enterprise verification failed:', recaptchaResult, recaptchaError);
+        toast.error(`reCAPTCHA verification failed${scoreInfo}. Please try again.`);
         setLoading(false);
         return;
       }
