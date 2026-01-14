@@ -19,3 +19,7 @@ verify_jwt = false
 # reCAPTCHA verification (public - called before auth)
 [functions.verify-recaptcha]
 verify_jwt = false
+
+# reCAPTCHA Enterprise verification (public - called before auth)
+[functions.verify-recaptcha-enterprise]
+verify_jwt = false
