@@ -15,17 +15,17 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">
         {/* Large Logo */}
-        <img src={opposiaLogo} alt="Opposites Attract" className="w-48 md:w-64 h-auto mx-auto mb-6" />
+        <img src={opposiaLogo} alt="Opposia" className="w-48 md:w-64 h-auto mx-auto mb-4" />
         
         <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
           <span className="text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">Find someone who complements you,</span>
           <span className="block text-black [text-shadow:_0_2px_15px_rgb(255_255_255_/_50%)]">
-            not another copy of you
+            We match on life.
           </span>
         </h1>
         
         <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
-          The dating app that celebrates connections and creates perfect chemistry. Find your compatible match and discover love through meaningful relationships.
+          Values, goals, and personality—so you can build something real.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

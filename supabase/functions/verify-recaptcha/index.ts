@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { token } = await req.json();
+    const { token, action } = await req.json();
 
     if (!token) {
       return new Response(
@@ -46,22 +46,47 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    if (data.success) {
-      return new Response(
-        JSON.stringify({ success: true }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
+    if (!data.success) {
       console.log('reCAPTCHA verification failed:', data['error-codes']);
       return new Response(
-        JSON.stringify({ 
-          success: false, 
+        JSON.stringify({
+          success: false,
           error: 'reCAPTCHA verification failed',
-          errorCodes: data['error-codes'] 
+          errorCodes: data['error-codes'],
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // reCAPTCHA v3 returns score + action. If present, validate them.
+    if (typeof data.score === 'number') {
+      const scoreOk = data.score >= 0.5;
+      const actionOk = !action || data.action === action;
+
+      if (!scoreOk || !actionOk) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'reCAPTCHA score/action check failed',
+            score: data.score,
+            expectedAction: action,
+            receivedAction: data.action,
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, score: data.score, action: data.action }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // reCAPTCHA v2: success only
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error verifying reCAPTCHA:', error);
     return new Response(

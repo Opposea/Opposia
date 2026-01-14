@@ -15,17 +15,44 @@ declare global {
   interface Window {
     grecaptcha: {
       ready: (callback: () => void) => void;
-      render: (container: string | HTMLElement, options: {
-        sitekey: string;
-        callback: (token: string) => void;
-        'expired-callback': () => void;
-      }) => number;
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback': () => void;
+        }
+      ) => number;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
       reset: (widgetId?: number) => void;
       getResponse: (widgetId?: number) => string;
     };
-    onRecaptchaLoad?: () => void;
   }
 }
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? '';
+const RECAPTCHA_MODE = (import.meta.env.VITE_RECAPTCHA_MODE ?? 'v3') as 'v3' | 'v2_checkbox';
+
+const loadRecaptchaScript = (mode: typeof RECAPTCHA_MODE, siteKey: string) => {
+  const existing = document.getElementById('recaptcha-script');
+  if (existing) return Promise.resolve();
+
+  const script = document.createElement('script');
+  script.id = 'recaptcha-script';
+  script.async = true;
+  script.defer = true;
+  script.src =
+    mode === 'v3'
+      ? `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`
+      : 'https://www.google.com/recaptcha/api.js?render=explicit';
+
+  document.head.appendChild(script);
+
+  return new Promise<void>((resolve, reject) => {
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load reCAPTCHA'));
+  });
+};
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -61,39 +88,50 @@ const AuthPage = () => {
     return () => clearInterval(interval);
   }, [getRemainingLockoutTime]);
 
-  // Initialize reCAPTCHA
+  // Initialize reCAPTCHA (v3 or v2 checkbox)
   useEffect(() => {
-    const initRecaptcha = () => {
-      if (window.grecaptcha && document.getElementById('recaptcha-container')) {
-        try {
-          const widgetId = window.grecaptcha.render('recaptcha-container', {
-            sitekey: '6Lfcp0ksAAAAAITpw8d6RY1V4cVhf-0pJhxVO-5b',
-            callback: (token: string) => {
-              setCaptchaToken(token);
-            },
-            'expired-callback': () => {
-              setCaptchaToken(undefined);
-            }
-          });
-          setRecaptchaWidgetId(widgetId);
-          setRecaptchaReady(true);
-        } catch (e) {
-          // Widget might already be rendered
-          console.log('reCAPTCHA already rendered or error:', e);
-        }
+    let cancelled = false;
+
+    const init = async () => {
+      if (!RECAPTCHA_SITE_KEY) {
+        console.error('Missing VITE_RECAPTCHA_SITE_KEY');
+        return;
       }
+
+      await loadRecaptchaScript(RECAPTCHA_MODE, RECAPTCHA_SITE_KEY);
+      if (cancelled) return;
+
+      if (!window.grecaptcha) {
+        throw new Error('grecaptcha not available after script load');
+      }
+
+      window.grecaptcha.ready(() => {
+        if (cancelled) return;
+
+        if (RECAPTCHA_MODE === 'v2_checkbox') {
+          const container = document.getElementById('recaptcha-container');
+          if (!container) return;
+
+          const widgetId = window.grecaptcha.render(container, {
+            sitekey: RECAPTCHA_SITE_KEY,
+            callback: (token: string) => setCaptchaToken(token),
+            'expired-callback': () => setCaptchaToken(undefined),
+          });
+
+          setRecaptchaWidgetId(widgetId);
+        }
+
+        setRecaptchaReady(true);
+      });
     };
 
-    // Check if grecaptcha is already loaded
-    if (window.grecaptcha) {
-      window.grecaptcha.ready(initRecaptcha);
-    } else {
-      // Wait for script to load
-      window.onRecaptchaLoad = initRecaptcha;
-    }
+    init().catch((e) => {
+      console.error('reCAPTCHA init failed:', e);
+      setRecaptchaReady(false);
+    });
 
     return () => {
-      window.onRecaptchaLoad = undefined;
+      cancelled = true;
     };
   }, []);
 
@@ -222,21 +260,32 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // Verify reCAPTCHA first
-      if (!captchaToken) {
+      if (!recaptchaReady || !window.grecaptcha || !RECAPTCHA_SITE_KEY) {
+        toast.error('reCAPTCHA is not ready yet. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+
+      const action = isSignUp ? 'signup' : 'signin';
+      const token =
+        RECAPTCHA_MODE === 'v3'
+          ? await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
+          : captchaToken;
+
+      if (!token) {
         toast.error('Please complete the reCAPTCHA verification');
         setLoading(false);
         return;
       }
 
       const { data: recaptchaResult, error: recaptchaError } = await supabase.functions.invoke('verify-recaptcha', {
-        body: { token: captchaToken }
+        body: { token, action }
       });
 
       if (recaptchaError || !recaptchaResult?.success) {
         toast.error('reCAPTCHA verification failed. Please try again.');
-        // Reset the captcha
-        if (recaptchaWidgetId !== null && window.grecaptcha) {
+        // Reset the captcha (v2 only)
+        if (RECAPTCHA_MODE === 'v2_checkbox' && recaptchaWidgetId !== null && window.grecaptcha) {
           window.grecaptcha.reset(recaptchaWidgetId);
         }
         setCaptchaToken(undefined);
@@ -496,8 +545,9 @@ const AuthPage = () => {
                 </div>
               </>
             )}
-            
-            <div id="recaptcha-container" className="mb-4"></div>
+            {RECAPTCHA_MODE === 'v2_checkbox' && (
+              <div id="recaptcha-container" className="mb-4" />
+            )}
             
             <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
               {lockoutSeconds > 0 ? (

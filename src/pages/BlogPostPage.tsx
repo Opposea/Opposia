@@ -28,7 +28,7 @@ const blogContent: Record<string, {
       "## The Opposites Attract Advantage",
       "Partners with complementary traits bring different perspectives to problem-solving, decision-making, and daily life. This diversity of thought and approach can make the relationship more resilient and adaptable. When one partner is anxious, the calmer one provides stability. When one is hesitant, the more decisive one moves things forward.",
       "## Finding Your Complement",
-      "The key to successful opposite attraction is understanding which differences complement each other and which create conflict. Core values should align, but personality traits can beneficially differ. This is why our compatibility quiz at Opposites Attract focuses on identifying complementary personality dimensions while ensuring fundamental compatibility.",
+      "The key to successful opposite attraction is understanding which differences complement each other and which create conflict. Core values should align, but personality traits can beneficially differ. This is why our compatibility quiz at Opposia focuses on identifying complementary personality dimensions while ensuring fundamental compatibility.",
       "Ready to find someone who complements you perfectly? Take our compatibility quiz and discover your ideal opposite match today.",
     ],
   },
@@ -116,9 +116,9 @@ const blogContent: Record<string, {
     date: "December 10, 2025",
     category: "App Guide",
     readTime: "4 min read",
-    content: [
-      "You have taken the Opposites Attract compatibility quiz—now what? Here is a guide to understanding your results and using them to find your perfect match.",
-      "## What We Measure",
+      content: [
+        "You have taken the Opposia compatibility quiz—now what? Here is a guide to understanding your results and using them to find your perfect match.",
+        "## What We Measure",
       "Our quiz assesses several key personality dimensions: introversion/extroversion, thinking style, planning preferences, emotional expression, and adventure orientation. Each dimension is scored on a spectrum.",
       "## Understanding Your Profile",
       "Your results show where you fall on each spectrum. There is no good or bad score—each position has its strengths. The goal is not to label you but to understand your natural tendencies.",
@@ -241,7 +241,7 @@ const BlogPostPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Find Your Opposite?
+            Ready to match on life?
           </h2>
           <p className="text-xl text-white/90 mb-8">
             Take our compatibility quiz and start your journey today.

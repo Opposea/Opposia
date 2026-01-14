@@ -8,13 +8,12 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src={opposiaLogo} alt="Opposites Attract" className="h-12 w-auto" />
+              <img src={opposiaLogo} alt="Opposia" className="h-12 w-auto" />
               
               
             </div>
             <p className="text-background/70 mb-6 max-w-md leading-relaxed">
-              The dating app that celebrates connections and creates perfect chemistry. 
-              Find your compatible match and discover love through meaningful relationships.
+              <strong>We match on life.</strong> Values, goals, and personality—so you can build something real.
             </p>
             <div className="flex gap-4">
               <Twitter className="w-6 h-6 text-background/60 hover:text-secondary cursor-pointer transition-colors" />
@@ -52,7 +51,7 @@ const Footer = () => {
         
         {/* Donation Section */}
         <div className="border-t border-background/20 pt-8 pb-8 text-center">
-          <p className="text-background/80 mb-4 text-lg">Support Opposites Attract</p>
+          <p className="text-background/80 mb-4 text-lg">Support Opposia</p>
           <a href="https://buy.stripe.com/4gM6oHayDe1G6Mk7BXgfu01" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="lg" className="bg-background/10 border-background/30 text-background hover:bg-background/20 gap-2">
               <Heart className="w-5 h-5 fill-current" />
@@ -60,14 +59,14 @@ const Footer = () => {
             </Button>
           </a>
           <p className="text-background/60 text-sm mt-3">
-            Help us keep bringing opposites together
+            Help us keep bringing people together
           </p>
         </div>
         
         {/* Bottom */}
         <div className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-background/60 text-sm">
-            © 2024 Opposites Attract. All rights reserved.
+            © 2026 Opposia Ltd. All rights reserved.
           </p>
           <p className="text-background/60 text-sm flex items-center gap-1">
             Made with <Heart className="w-4 h-4 text-secondary fill-secondary" /> for finding love
