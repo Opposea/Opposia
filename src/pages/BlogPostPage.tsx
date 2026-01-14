@@ -28,7 +28,7 @@ const blogContent: Record<string, {
       "## The Opposites Attract Advantage",
       "Partners with complementary traits bring different perspectives to problem-solving, decision-making, and daily life. This diversity of thought and approach can make the relationship more resilient and adaptable. When one partner is anxious, the calmer one provides stability. When one is hesitant, the more decisive one moves things forward.",
       "## Finding Your Complement",
-      "The key to successful opposite attraction is understanding which differences complement each other and which create conflict. Core values should align, but personality traits can beneficially differ. This is why our compatibility quiz at Opposites Attract focuses on identifying complementary personality dimensions while ensuring fundamental compatibility.",
+      "The key to successful opposite attraction is understanding which differences complement each other and which create conflict. Core values should align, but personality traits can beneficially differ. This is why our compatibility quiz at Opposia focuses on identifying complementary personality dimensions while ensuring fundamental compatibility.",
       "Ready to find someone who complements you perfectly? Take our compatibility quiz and discover your ideal opposite match today.",
     ],
   },

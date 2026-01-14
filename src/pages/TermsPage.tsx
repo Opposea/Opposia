@@ -25,7 +25,7 @@ const TermsPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-3">1. Acceptance of Terms</h3>
                 <p className="text-muted-foreground">
-                  By accessing and using Opposites Attract, you accept and agree to be bound by the terms and provisions of this agreement.
+                  By accessing and using Opposia, you accept and agree to be bound by the terms and provisions of this agreement.
                 </p>
               </div>
 
