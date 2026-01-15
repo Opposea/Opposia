@@ -16,132 +16,124 @@ const CookiePolicyPage = () => {
           <div className="space-y-8">
             {/* Section 1 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">1. What Are Cookies?</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">1. What Are Cookies and Similar Technologies?</h3>
               <div className="space-y-3 text-muted-foreground">
                 <p>
-                  Cookies are small text files placed on your device when you visit a website. Cookies help websites function, remember preferences, and (where permitted) improve performance.
+                  Cookies are small text files placed on your device. We may also use similar technologies (e.g., local storage). In this policy we refer to these collectively as "cookies" or "storage/access technologies".
                 </p>
                 <p>
-                  We may also use similar technologies (such as local storage). In this policy, we refer to these collectively as "cookies".
+                  Under PECR, storing or accessing information on a user's device generally requires consent unless strictly necessary for a service the user requests.
                 </p>
               </div>
             </div>
 
             {/* Section 2 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">2. How We Use Cookies</h3>
-              <p className="text-muted-foreground mb-4">We use cookies for:</p>
-              <div className="space-y-3 text-muted-foreground">
-                <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Strictly Necessary (Essential):</strong> to enable core website functionality and security, including remembering your cookie choices.</p>
-                </div>
-                <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Authentication (where applicable):</strong> to keep you logged in and maintain your session.</p>
-                </div>
-                <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Analytics (no cookies):</strong> we use Vercel Web Analytics to understand overall site usage and improve performance. Vercel Web Analytics is designed to operate without third-party cookies and stores anonymised analytics data.</p>
-                </div>
-                <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Marketing:</strong> we do not use marketing/advertising cookies.</p>
-                </div>
-              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-4">2. What We Use (and Don't Use)</h3>
+              <p className="text-muted-foreground mb-4">We use:</p>
+              <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+                <li><strong>Strictly necessary cookies</strong> to run the site, secure it, and remember cookie choices.</li>
+                <li><strong>Authentication/session cookies</strong> (where applicable) to keep you logged in.</li>
+              </ul>
+              <p className="text-muted-foreground mb-4">We do not use:</p>
+              <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                <li>third-party advertising cookies; or</li>
+                <li>social media tracking cookies.</li>
+              </ul>
             </div>
 
             {/* Section 3 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">3. Analytics and Performance Measurement (Vercel)</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">3. Analytics (Vercel) — Consent-Gated</h3>
               <div className="space-y-3 text-muted-foreground">
                 <p>We use:</p>
                 <ul className="list-disc list-inside ml-4 space-y-2">
-                  <li><strong>Vercel Web Analytics</strong> to measure website usage in a privacy-focused way (designed not to use third-party cookies).</li>
-                  <li><strong>Vercel Speed Insights</strong> to measure performance (Core Web Vitals) in a way intended not to identify users or reconstruct browsing sessions across pages.</li>
+                  <li><strong>Vercel Web Analytics</strong> (traffic measurement) and</li>
+                  <li><strong>Vercel Speed Insights</strong> (performance/Core Web Vitals).</li>
                 </ul>
                 <p>
-                  These tools may still involve processing limited technical information as part of normal web requests (for example device/browser information and approximate location such as country), but are designed to avoid traditional cookie-based tracking.
+                  Vercel states Web Analytics does not use third-party cookies and identifies visitors using a hash created from the incoming request, and session lifespan is discarded after 24 hours.
+                </p>
+                <p>
+                  <strong>Our approach:</strong> to be conservative under PECR/ICO guidance, we only enable analytics after you opt in via our cookie/settings banner (even if the tool is "cookieless").
                 </p>
               </div>
             </div>
 
             {/* Section 4 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">4. Cookies We Use (Cookie List)</h3>
-              <p className="text-muted-foreground mb-4">We maintain a list of cookies used on our website. This list may change as we update the Service.</p>
+              <h3 className="text-xl font-semibold text-foreground mb-4">4. Cookie List (Examples)</h3>
               
-              <h4 className="font-semibold text-foreground mb-3">Strictly Necessary Cookies (Always On)</h4>
+              <h4 className="font-semibold text-foreground mb-3">Strictly necessary (always on)</h4>
               <div className="overflow-x-auto mb-6">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-2 px-3 text-foreground font-semibold">Purpose</th>
-                      <th className="text-left py-2 px-3 text-foreground font-semibold">Example</th>
                       <th className="text-left py-2 px-3 text-foreground font-semibold">Typical Duration</th>
                     </tr>
                   </thead>
                   <tbody className="text-muted-foreground">
                     <tr className="border-b border-border">
-                      <td className="py-2 px-3">Store cookie preferences</td>
                       <td className="py-2 px-3">Cookie preference record</td>
                       <td className="py-2 px-3">Up to 1 year</td>
                     </tr>
                     <tr className="border-b border-border">
-                      <td className="py-2 px-3">Authentication/session (where applicable)</td>
-                      <td className="py-2 px-3">Session/auth cookies (may be set by Opposia and/or Supabase)</td>
+                      <td className="py-2 px-3">Authentication/session cookies (may be set by Opposia and/or our auth provider, e.g., Supabase)</td>
                       <td className="py-2 px-3">Session / as required</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3">Security</td>
-                      <td className="py-2 px-3">Security-related cookies</td>
+                      <td className="py-2 px-3">Security cookies</td>
                       <td className="py-2 px-3">Session</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <h4 className="font-semibold text-foreground mb-3">Analytics Cookies</h4>
-              <p className="text-muted-foreground text-sm italic">
-                As noted above, we use Vercel Web Analytics which is designed to operate without third-party cookies.
+              <h4 className="font-semibold text-foreground mb-3">Analytics (optional, requires opt-in)</h4>
+              <p className="text-muted-foreground text-sm">
+                Analytics may run without cookies, but still involves processing limited technical data (e.g., device/browser, IP-derived country/region). We treat this category as optional and only enable it with consent.
               </p>
             </div>
 
             {/* Section 5 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">5. Third-Party Cookies</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">5. Third Parties</h3>
               <p className="text-muted-foreground">
-                Some cookies may be set by third-party service providers we use to operate the website (for example authentication/session services such as Supabase, where applicable). We do not use third-party advertising or social media tracking cookies.
+                Some cookies may be set by service providers we use to operate the Service (e.g., authentication/session providers). We do not permit third-party advertising cookies.
               </p>
             </div>
 
             {/* Section 6 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">6. Managing Your Cookie Preferences</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">6. Managing Your Preferences</h3>
               <p className="text-muted-foreground mb-4">You can manage cookies by:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Visiting this page: <Link to="/cookie-policy" className="text-primary hover:underline">https://www.opposia.com/cookie-policy</Link></li>
-                <li>Using the <Link to="/cookie-settings" className="text-primary hover:underline">Cookie Settings</Link> link in the website footer (if available); and/or</li>
-                <li>Adjusting your browser settings to block or delete cookies.</li>
+                <li>using the <Link to="/cookie-settings" className="text-primary hover:underline">Cookie Settings</Link> link (where available); and/or</li>
+                <li>adjusting your browser controls to block/delete cookies.</li>
               </ul>
               <p className="text-muted-foreground mt-4">
-                <strong>Please note:</strong> blocking strictly necessary cookies may affect website functionality (for example logging in).
+                <strong>Please note:</strong> Blocking strictly necessary cookies may break site features (e.g., login).
+              </p>
+              <p className="text-muted-foreground mt-4">
+                Cookie Policy URL: <Link to="/cookie-policy" className="text-primary hover:underline">https://www.opposia.com/cookie-policy</Link>
               </p>
             </div>
 
             {/* Section 7 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">7. Changes to This Policy</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">7. Changes</h3>
               <p className="text-muted-foreground">
-                We may update this Cookie Policy to reflect changes in our practices or for operational, legal, or regulatory reasons. Please review this page periodically.
+                We may update this Cookie Policy for operational, legal, or regulatory reasons. Please review it periodically.
               </p>
             </div>
 
             {/* Section 8 */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">8. Contact Us</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">8. Contact</h3>
               <div className="text-muted-foreground">
-                <p>If you have questions about cookies, contact:</p>
+                <p><strong>Opposia Ltd</strong></p>
                 <p className="mt-2">
-                  <strong>Opposia Ltd</strong><br />
-                  Company No. 16955158<br />
-                  167–169 Great Portland Street, 5th Floor, London, W1W 5PF<br />
                   <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>
                 </p>
               </div>

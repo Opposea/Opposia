@@ -31,27 +31,31 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">1. Who We Are (Controller)</h3>
                 <div className="space-y-3 text-muted-foreground">
-                  <p>Opposia Ltd will be referred to as ("Opposia", "we", "us", "our") during this Privacy policy and throughout our terms of service.</p>
-                  <p>Opposia Ltd is a registered private company in England and Wales (Company No. 16955158) we have a registered office at 167–169 Great Portland Street, 5th Floor, London, W1W 5PF. We operate the Opposia website, apps, and related services (the "Service").</p>
+                  <p>Opposia Ltd will be referred to as ("Opposia", "we", "us", "our") during this Privacy Policy and throughout our terms of service. Opposia is a private limited company registered in England & Wales (Company No. 16955158), with registered office at 167–169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom. We operate the Opposia website, apps, and related services (the "Service").</p>
                   <p>For the purposes of the UK General Data Protection Regulation ("UK GDPR") and the Data Protection Act 2018 ("DPA 2018"), Opposia Ltd is the data controller.</p>
-                  <p><strong>General Contact:</strong> <a href="mailto:admin@opposia.com" className="text-primary hover:underline">admin@opposia.com</a></p>
-                  <p><strong>Privacy Complaints:</strong> <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a></p>
+                  <p><strong>Privacy contact:</strong> <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a></p>
+                  <p className="text-sm italic">(Write "Privacy Request" in the subject line.)</p>
+                  <p><strong>Data Protection Officer (DPO):</strong> We have not appointed a DPO at this time. If this changes, we will update this policy.</p>
                 </div>
               </div>
 
               {/* Section 2 */}
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">2. Scope of This Policy</h3>
-                <p className="text-muted-foreground">
-                  This policy explains how we collect, use, share, and protect personal data when you create an account, use matching and messaging features, or contact our support and safety teams. It also explains your rights and how to exercise them.
-                </p>
+                <p className="text-muted-foreground mb-3">This policy explains how we collect, use, share, and protect personal data when you:</p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                  <li>create and manage an account;</li>
+                  <li>use matching, profile and messaging features;</li>
+                  <li>report users/content or contact support/safety; and/or</li>
+                  <li>use our website and apps (including technical logs and security).</li>
+                </ul>
               </div>
 
               {/* Section 3 */}
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">3. The Service and Eligibility</h3>
                 <p className="text-muted-foreground">
-                  Opposia is an online platform intended to facilitate social and romantic connections between consenting adults aged 18+. We do not knowingly permit anyone under 18 to use the Service (see Section 16).
+                  Opposia is intended for consenting adults aged 18+. We do not knowingly allow people under 18 to use the Service (see Section 17).
                 </p>
               </div>
 
@@ -59,10 +63,10 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">4. Key Definitions</h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li><strong>Personal data:</strong> information relating to an identified or identifiable individual.</li>
+                  <li><strong>Personal data:</strong> information relating to an identified or identifiable person.</li>
                   <li><strong>Special category data:</strong> includes data revealing sexual orientation.</li>
-                  <li><strong>Criminal offence data:</strong> data relating to criminal convictions, offences, or allegations.</li>
-                  <li><strong>Processor:</strong> a third party that processes personal data on our behalf under contract.</li>
+                  <li><strong>Criminal offence data:</strong> data about criminal convictions/offences or related allegations handled under applicable safeguards (DPA 2018).</li>
+                  <li><strong>Processor:</strong> a third party processing personal data on our behalf under contract.</li>
                 </ul>
               </div>
 
@@ -70,30 +74,35 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">5. Personal Data We Collect</h3>
                 
-                <h4 className="font-semibold text-foreground mt-4 mb-2">5.1 Data you provide to us (Account & Profile Data)</h4>
+                <h4 className="font-semibold text-foreground mt-4 mb-2">5.1 Data you provide (Account & Profile)</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 mb-4">
-                  <li>Email address, account credentials, and date of birth (for age verification).</li>
-                  <li>Gender and relationship preferences.</li>
-                  <li>Sexual orientation (special category data — see Section 8).</li>
-                  <li>General location (e.g., city/region), profile photos, and biographical information you choose to provide.</li>
-                  <li>Subscription/payment metadata (full payment details are processed by our payment provider).</li>
+                  <li>Email address, login credentials, and date of birth (for age assurance).</li>
+                  <li>Gender, relationship preferences, and matching preferences.</li>
+                  <li>Sexual orientation (special category data) only if you choose to provide it.</li>
+                  <li>General location (e.g., city/region), profile photos, and profile bio.</li>
+                  <li>Subscription/payment metadata (we do not store full card details; these are handled by our payment provider).</li>
                 </ul>
 
-                <h4 className="font-semibold text-foreground mt-4 mb-2">5.2 Data collected automatically (Technical & Usage Data)</h4>
+                <h4 className="font-semibold text-foreground mt-4 mb-2">5.2 Data collected automatically (Technical & Usage)</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 mb-4">
-                  <li>IP address, device type, browser/app version, operating system, log data (e.g., date/time, pages/screens viewed, crash logs), and approximate location derived from IP.</li>
-                  <li>Cookie/SDK identifiers and analytics events (subject to your cookie/consent choices; see Section 14).</li>
+                  <li>IP address, device type, browser/app version, OS, time/date stamps, pages/screens viewed, crash logs, and approximate location derived from IP.</li>
+                  <li>Cookie/local storage identifiers (where used) and analytics events depending on your settings/consent (see Section 14).</li>
                 </ul>
 
-                <h4 className="font-semibold text-foreground mt-4 mb-2">5.3 Data generated through your use of the Service</h4>
+                <h4 className="font-semibold text-foreground mt-4 mb-2">5.3 Data generated through use of the Service</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 mb-4">
-                  <li>Likes, matches, blocks, messages, reports, support tickets, and communications with us.</li>
-                  <li>Evidence you submit voluntarily (e.g., screenshots) in connection with reports or disputes.</li>
+                  <li>Likes, matches, blocks, messages, reports, safety tickets, and communications with us.</li>
+                  <li>Evidence you submit voluntarily (e.g., screenshots) for reports, complaints, disputes, or legal claims.</li>
                 </ul>
 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">5.4 Data about other people you provide</h4>
+                <p className="text-muted-foreground mb-4">
+                  If you share information about another person (e.g., in a report), you must have the right to share it. We use it only to handle the issue you raised (e.g., safety enforcement, dispute handling).
+                </p>
+
+                <h4 className="font-semibold text-foreground mt-4 mb-2">5.5 Data we do not intend to collect</h4>
                 <p className="text-muted-foreground">
-                  If you share information about other people (e.g., in a report), you must ensure you have the right to share it. We use this only to handle the specific issue you raised (e.g., a safety report).
+                  We do not ask for health data, political opinions, religion, or identity documents as a standard requirement. If you voluntarily include such information in messages/bios/reports, we may process it only where necessary for safety, compliance, or legal claims and apply additional safeguards.
                 </p>
               </div>
 
@@ -103,91 +112,84 @@ const PrivacyPage = () => {
                 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">6.1 Profile visibility</h4>
                 <p className="text-muted-foreground mb-4">
-                  Other users may see your profile information, including photos, bio, age/age range, general location, gender, sexual orientation, relationship preferences, and match status, as part of the Service's functionality (and subject to your settings, where available).
+                  Other users may see your profile information (e.g., photos, bio, approximate location, preferences) as part of Service functionality, subject to your settings (where available).
                 </p>
 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">6.2 Messaging</h4>
                 <p className="text-muted-foreground mb-4">
-                  Messages you send are delivered to your chosen recipients. Other users may copy, forward, or screenshot information you share with them, and we cannot fully control what they do with it outside our platform.
+                  Messages are delivered to recipients you choose. Others may copy/screenshot information you share, and we cannot fully control what happens outside our platform.
                 </p>
 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">6.3 Controls</h4>
                 <p className="text-muted-foreground">
-                  You can control some sharing through account settings, by editing your profile, blocking users, or reporting content.
+                  You can edit your profile, change settings (where available), block users, and report content.
                 </p>
               </div>
 
               {/* Section 7 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">7. How We Use Your Personal Data (Purposes & Legal Bases)</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">7. How We Use Your Data (Purposes & Legal Bases)</h3>
                 <p className="text-muted-foreground mb-4">We process personal data only where we have a lawful basis under UK GDPR.</p>
                 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-muted-foreground border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2 font-semibold text-foreground">Purpose</th>
-                        <th className="text-left p-2 font-semibold text-foreground">Data Used</th>
-                        <th className="text-left p-2 font-semibold text-foreground">Lawful Basis (Art 6)</th>
-                        <th className="text-left p-2 font-semibold text-foreground">Special Category (Art 9)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-xs">
-                      <tr className="border-b">
-                        <td className="p-2">Provide & operate the Service</td>
-                        <td className="p-2">Account, Profile, Usage, Messages</td>
-                        <td className="p-2">Contract (Art 6(1)(b))</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Process gender, preferences & location for matchmaking</td>
-                        <td className="p-2">Gender, Preferences, Location</td>
-                        <td className="p-2">Contract (Art 6(1)(b))</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Process sexual orientation for matchmaking</td>
-                        <td className="p-2">Sexual orientation</td>
-                        <td className="p-2">Consent (Art 6(1)(a))</td>
-                        <td className="p-2">Explicit consent (Art 9(2)(a))</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Trust & safety, moderation, dispute handling</td>
-                        <td className="p-2">Profile, Messages, Reports, Evidence</td>
-                        <td className="p-2">Legitimate interests (Art 6(1)(f))</td>
-                        <td className="p-2">Legal claims (Art 9(2)(f))</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Security and fraud prevention</td>
-                        <td className="p-2">Technical, Logs, Account signals</td>
-                        <td className="p-2">Legitimate interests (Art 6(1)(f))</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Service communications</td>
-                        <td className="p-2">Contact Data</td>
-                        <td className="p-2">Contract / Legitimate interests</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Marketing (in line with PECR)</td>
-                        <td className="p-2">Contact Data, Preferences</td>
-                        <td className="p-2">Consent or Legitimate interests</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2">Legal & regulatory compliance</td>
-                        <td className="p-2">As required</td>
-                        <td className="p-2">Legal obligation (Art 6(1)(c))</td>
-                        <td className="p-2">N/A</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <h4 className="font-semibold text-foreground mt-4 mb-3">7.1 Purposes, data categories, and lawful bases</h4>
+                
+                <div className="space-y-4 text-muted-foreground text-sm">
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">A. Provide and operate the Service (account, matching, messaging)</p>
+                    <p><strong>Data:</strong> Account & Profile; Usage; Messages</p>
+                    <p><strong>Lawful basis:</strong> Contract (UK GDPR Art 6(1)(b))</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">B. Match suggestions and ranking (profiling)</p>
+                    <p><strong>Data:</strong> Preferences, approximate location, usage signals</p>
+                    <p><strong>Lawful basis:</strong> Contract (Art 6(1)(b)) and/or Legitimate interests (Art 6(1)(f)) (running and improving the Service)</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">C. Process sexual orientation for matchmaking (if provided)</p>
+                    <p><strong>Data:</strong> Sexual orientation</p>
+                    <p><strong>Lawful basis:</strong> Consent (Art 6(1)(a))</p>
+                    <p><strong>Special category condition:</strong> Explicit consent (Art 9(2)(a))</p>
+                    <p className="italic">You can withdraw consent at any time (Section 16).</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">D. Trust & safety: moderation, investigations, dispute handling, enforcement</p>
+                    <p><strong>Data:</strong> Profiles, messages, reports, evidence, device/IP signals</p>
+                    <p><strong>Lawful basis:</strong> Legitimate interests (Art 6(1)(f)) (keep users safe, prevent abuse/fraud) and/or Legal claims</p>
+                    <p><strong>Special category/criminal-related info:</strong> processed where necessary for establishment/exercise/defence of legal claims or substantial public interest/safeguarding as applicable, with DPA 2018 safeguards.</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">E. Security and fraud prevention</p>
+                    <p><strong>Data:</strong> Technical logs, IP, device info, account signals</p>
+                    <p><strong>Lawful basis:</strong> Legitimate interests (Art 6(1)(f))</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">F. Service communications (important notices, security alerts, updates)</p>
+                    <p><strong>Data:</strong> Contact details</p>
+                    <p><strong>Lawful basis:</strong> Contract (Art 6(1)(b)) and/or Legitimate interests (Art 6(1)(f))</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">G. Marketing (where permitted)</p>
+                    <p><strong>Data:</strong> Contact details, preferences</p>
+                    <p><strong>Lawful basis:</strong> Consent (Art 6(1)(a)) where required under PECR, or Legitimate interests (Art 6(1)(f)) where lawful</p>
+                    <p className="italic">You can opt out at any time.</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-md">
+                    <p className="font-semibold text-foreground mb-2">H. Legal & regulatory compliance</p>
+                    <p><strong>Data:</strong> as required</p>
+                    <p><strong>Lawful basis:</strong> Legal obligation (Art 6(1)(c))</p>
+                  </div>
                 </div>
 
-                <h4 className="font-semibold text-foreground mt-6 mb-2">7.1 Marketing and PECR</h4>
+                <h4 className="font-semibold text-foreground mt-6 mb-2">7.2 Marketing and PECR</h4>
                 <p className="text-muted-foreground">
-                  We send marketing only where permitted under the Privacy and Electronic Communications Regulations (PECR). You can opt out at any time via the unsubscribe link in messages and, where available, your account settings.
+                  We send marketing only where permitted by PECR and data protection law. You can opt out via unsubscribe links or by contacting <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>.
                 </p>
               </div>
 
@@ -195,42 +197,50 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">8. Special Category Data and Criminal Offence / Allegation Information</h3>
                 
-                <h4 className="font-semibold text-foreground mt-4 mb-2">8.1 Sexual orientation (special category)</h4>
+                <h4 className="font-semibold text-foreground mt-4 mb-2">8.1 Sexual orientation</h4>
                 <p className="text-muted-foreground mb-4">
-                  We process your sexual orientation for matchmaking on the basis of your explicit consent (Art 9(2)(a)) and consent (Art 6(1)(a)), provided during profile creation via a clear affirmative action. You can withdraw consent at any time. If you withdraw consent, we will stop processing sexual orientation for matchmaking and your matching experience may be limited or unavailable.
+                  We process sexual orientation for matchmaking only if you provide it, and only with your explicit consent. You may withdraw consent at any time.
                 </p>
 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">8.2 Other special category data you may choose to share</h4>
                 <p className="text-muted-foreground mb-4">
-                  We do not ask you to provide other special category data (e.g., health details, political opinions, religious beliefs). If you voluntarily include it (e.g., in your bio, messages, or reports), we may process it only where necessary for trust & safety, moderation, dispute handling, or legal claims, and we apply additional safeguards.
+                  If you voluntarily provide other special category data (e.g., in messages/reports), we process it only where necessary for trust & safety, dispute handling, or legal claims, using additional safeguards.
                 </p>
 
                 <h4 className="font-semibold text-foreground mt-4 mb-2">8.3 Criminal offence and allegation information (narrow, safety-focused)</h4>
-                <p className="text-muted-foreground">
-                  Opposia does not carry out criminal background checks. However, reports or evidence you submit may include allegations of criminal conduct (for example threats or harassment). Where this occurs, we process that information only to handle the report, keep users safe, prevent misuse of the Service, and establish, exercise or defend legal claims, with appropriate safeguards under the DPA 2018.
+                <p className="text-muted-foreground mb-2">
+                  Opposia does not conduct routine background checks. However, reports/evidence may include allegations of criminal behaviour (e.g., threats, harassment). Where this occurs, we process that information only to:
                 </p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
+                  <li>investigate and enforce our Terms,</li>
+                  <li>protect users,</li>
+                  <li>prevent misuse, and</li>
+                  <li>establish/exercise/defend legal claims,</li>
+                </ul>
+                <p className="text-muted-foreground mt-2">with safeguards required by the DPA 2018.</p>
               </div>
 
               {/* Section 9 */}
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">9. Automated Processing & Profiling</h3>
                 <p className="text-muted-foreground mb-3">
-                  We use automated profiling to suggest matches (for example based on preferences and general location). This does not produce legal or similarly significant effects for you.
+                  We use automated processing to suggest matches (e.g., preferences and approximate location). This does not produce legal or similarly significant effects for you.
                 </p>
                 <p className="text-muted-foreground">
-                  Significant enforcement actions (like account suspension or termination) are not made solely by automated means and involve human review. You may appeal by contacting <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>.
+                  We do not make final suspension/termination decisions solely by automated means; we use human review. You may appeal by contacting <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>.
                 </p>
               </div>
 
               {/* Section 10 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">10. Who We Share Personal Data With</h3>
-                <p className="text-muted-foreground mb-3">We may share personal data with:</p>
+                <h3 className="text-xl font-semibold text-foreground mb-4">10. Who We Share Data With</h3>
+                <p className="text-muted-foreground mb-3">We may share data with:</p>
                 <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                  <li><strong>Other users,</strong> as part of the Service design (see Section 6).</li>
-                  <li><strong>Trusted service providers (processors)</strong> for hosting, support, analytics (subject to consent where required), security, and professional advice, under appropriate contractual obligations.</li>
-                  <li><strong>Authorities or third parties</strong> where required by law or necessary to protect rights, safety, or prevent wrongdoing.</li>
-                  <li><strong>A buyer/successor</strong> in the event of a merger, acquisition, reorganisation, or asset sale, subject to appropriate safeguards.</li>
+                  <li><strong>Other users</strong> (as part of the Service, see Section 6).</li>
+                  <li><strong>Processors</strong> providing hosting, authentication, databases, customer support tooling, analytics (where enabled), security services, email delivery, and professional advisers, under contract.</li>
+                  <li><strong>Payment providers</strong> (to process payments; we do not store full card details).</li>
+                  <li><strong>Authorities/third parties</strong> where required by law or necessary to protect rights, safety, or prevent wrongdoing.</li>
+                  <li><strong>Corporate transactions</strong> (buyer/successor) in a merger/acquisition/reorganisation/sale, with safeguards.</li>
                 </ul>
                 <p className="text-muted-foreground mt-3 font-semibold">
                   We do not sell your personal data for third-party marketing.
@@ -239,9 +249,9 @@ const PrivacyPage = () => {
 
               {/* Section 11 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">11. International Data Transfers</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">11. International Transfers</h3>
                 <p className="text-muted-foreground">
-                  Where personal data is transferred outside the UK, we ensure protection via UK adequacy regulations or the UK International Data Transfer Agreement (IDTA) (or other UK-approved mechanism). Where required, we also carry out transfer risk assessments and apply supplementary measures.
+                  If personal data is transferred outside the UK, we use UK adequacy regulations or UK-approved transfer mechanisms (e.g., IDTA/addendum) and apply transfer risk assessments/supplementary measures where required.
                 </p>
               </div>
 
@@ -249,7 +259,7 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">12. Data Security</h3>
                 <p className="text-muted-foreground">
-                  We implement technical and organisational measures designed to protect personal data, including (as appropriate) encryption, access controls, monitoring, security testing, and staff training. No system is 100% secure; you must keep your login credentials confidential.
+                  We use technical and organisational measures designed to protect personal data (e.g., encryption where appropriate, access controls, monitoring, security testing). No system is 100% secure; keep your login credentials confidential.
                 </p>
               </div>
 
@@ -257,112 +267,80 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">13. Data Retention</h3>
                 <p className="text-muted-foreground mb-4">
-                  We keep personal data only as long as necessary for the purposes described in this policy and to comply with legal obligations.
+                  We retain data only as long as needed for the purposes above and legal requirements.
                 </p>
                 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-muted-foreground border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2 font-semibold text-foreground">Data Category</th>
-                        <th className="text-left p-2 font-semibold text-foreground">Retention Period</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-xs">
-                      <tr className="border-b">
-                        <td className="p-2">Active account data</td>
-                        <td className="p-2">While your account is active.</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Inactive accounts</td>
-                        <td className="p-2">Deleted/anonymised after 24 months of inactivity (following a warning notice where feasible).</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Account deletion request</td>
-                        <td className="p-2">Deleted/anonymised within 30 days of a verified request, subject to legal/compliance holds.</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Backups</td>
-                        <td className="p-2">May persist for up to 90 days before secure overwrite/deletion (restricted and not used for routine operations).</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Sexual orientation data</td>
-                        <td className="p-2">We stop using it for matchmaking upon withdrawal of consent and suppress it from active matching systems within 48 hours (backup rollover applies).</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Safety/moderation reports & evidence</td>
-                        <td className="p-2">3 years from case closure (longer if necessary for legal claims or serious safety reasons).</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Technical logs (IP)</td>
-                        <td className="p-2">90 days (unless needed longer for investigating abuse/security incidents).</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Financial records</td>
-                        <td className="p-2">7 years for accounting/tax compliance.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2">Legal/Compliance Holds</td>
-                        <td className="p-2">Retained as required by law or for ongoing proceedings.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                  <li><strong>Active account data:</strong> while your account is active.</li>
+                  <li><strong>Inactive accounts:</strong> deleted/anonymised after 24 months inactivity (where feasible we will warn you before deletion).</li>
+                  <li><strong>Deletion requests:</strong> deleted/anonymised within 30 days of a verified request, subject to legal/compliance holds.</li>
+                  <li><strong>Backups:</strong> may persist up to 90 days (restricted access, not used for routine operations).</li>
+                  <li><strong>Sexual orientation:</strong> if you withdraw consent, we stop using it for matchmaking and suppress it in active matching systems within 48 hours (backup rollover applies).</li>
+                  <li><strong>Safety/moderation reports & evidence:</strong> 3 years from closure (longer if needed for serious safety issues or legal claims).</li>
+                  <li><strong>Technical logs (e.g., IP):</strong> 90 days, unless needed longer for investigating abuse/security incidents.</li>
+                  <li><strong>Financial/accounting records:</strong> 7 years (tax/accounting).</li>
+                  <li><strong>Legal holds:</strong> as required.</li>
+                </ul>
               </div>
 
               {/* Section 14 */}
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">14. Cookies and Similar Technologies</h3>
                 <p className="text-muted-foreground">
-                  We use cookies and similar technologies for operation, security, and analytics. Non-essential cookies require your consent. See our <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link>.
+                  We use cookies/local storage only where needed for functionality and security, and (where enabled) for analytics. Non-essential technologies are used only with your consent. See our <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link>.
                 </p>
               </div>
 
               {/* Section 15 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">15. Your Rights Under UK Data Protection Law</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">15. Your Rights</h3>
                 <p className="text-muted-foreground mb-3">
-                  You have the right to: access, rectification, erasure, restriction, objection, data portability (for data provided under contract or consent), and to withdraw consent (where processing is based on consent). You can object to direct marketing at any time and we will stop.
+                  You have rights to: access, rectification, erasure, restriction, objection, data portability (where applicable), and to withdraw consent at any time (where processing is based on consent). We will respond within one month, subject to lawful extensions for complex requests.
                 </p>
                 <p className="text-muted-foreground">
-                  To exercise these rights, contact <a href="mailto:privacy@opposia.com" className="text-primary hover:underline">privacy@opposia.com</a>. We may verify your identity and will respond within one month (subject to lawful extensions for complex requests).
+                  <strong>How to exercise rights:</strong> email <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a> (subject: "Privacy Request"). We may request verification.
                 </p>
               </div>
 
               {/* Section 16 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">16. Children's Data (Under 18)</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">16. Withdrawing Consent</h3>
                 <p className="text-muted-foreground">
-                  Our Service is for adults 18+. We do not knowingly collect data from under-18s. If you believe a minor is using the Service, contact <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>.
+                  Where we rely on consent (e.g., sexual orientation; analytics where consent-gated), you can withdraw consent at any time via settings (where available) or by contacting <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>. Withdrawal does not affect processing carried out before withdrawal.
                 </p>
               </div>
 
               {/* Section 17 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">17. Complaints</h3>
-                <p className="text-muted-foreground mb-3">
-                  If you have concerns about how we use your personal data, please contact us first via our Privacy Complaints Form or at <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>. We will acknowledge your complaint within 30 days and respond without undue delay, keeping you appropriately informed where reasonable.
-                </p>
+                <h3 className="text-xl font-semibold text-foreground mb-4">17. Children (Under 18)</h3>
                 <p className="text-muted-foreground">
-                  You also have the right to complain to the UK supervisory authority, the Information Commissioner's Office (ICO), at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ico.org.uk</a>.
+                  The Service is for adults 18+. If you believe a minor is using the Service, contact <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a>.
                 </p>
               </div>
 
               {/* Section 18 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">18. Changes to This Policy</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">18. Complaints</h3>
                 <p className="text-muted-foreground">
-                  We may update this policy from time to time. Material changes will be notified via email or a Service notice, and the "Last Updated" date will be revised.
+                  Contact us first at <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a> (subject: "Privacy Complaint"). You also have the right to complain to the UK supervisory authority, the Information Commissioner's Office (ICO).
                 </p>
               </div>
 
               {/* Section 19 */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">19. Contact</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">19. Changes</h3>
+                <p className="text-muted-foreground">
+                  We may update this policy. If changes are material, we will notify you via email and/or in-Service notice and update the "Last Updated" date.
+                </p>
+              </div>
+
+              {/* Section 20 */}
+              <div className="bg-card p-6 rounded-lg border">
+                <h3 className="text-xl font-semibold text-foreground mb-4">20. Contact</h3>
                 <div className="text-muted-foreground space-y-1">
                   <p><strong>Opposia Ltd</strong></p>
                   <p>167–169 Great Portland Street, 5th Floor, London, W1W 5PF</p>
-                  <p>General Support: <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a></p>
+                  <p>Support & Privacy: <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a></p>
                 </div>
               </div>
             </div>
