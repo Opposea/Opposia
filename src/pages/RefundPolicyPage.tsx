@@ -13,64 +13,98 @@ const RefundPolicyPage = () => {
           </div>
 
           <div className="space-y-8">
-            {/* Section 1 */}
+            {/* Section 1 - Overview */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">1. General Refund Principle</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">1. Overview</h3>
               <p className="text-muted-foreground">
-                Opposia Ltd offers paid subscription plans. Unless otherwise required by law, all fees are non-refundable. This is because you pay for access to the platform and its features for a period of time, not for a specific result (such as finding a match).
+                Opposia Ltd offers paid subscriptions that provide access to premium features for a set period. Unless required by law, fees are non-refundable because you pay for time-limited access to features, not for any specific outcome (such as finding a match).
               </p>
             </div>
 
-            {/* Section 2 */}
+            {/* Section 2 - Subscriptions, Renewals, and Cancellation */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">2. Subscription Terms & Cancellation</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">2. Subscriptions, Renewals, and Cancellation (Email Only)</h3>
               <div className="space-y-3 text-muted-foreground">
-                <p><strong>2.1 Subscription Cycles:</strong> Subscriptions renew automatically at the end of each billing cycle (monthly or annual) unless you cancel before the renewal date.</p>
-                <p><strong>2.2 How to Cancel:</strong> You can cancel automatic renewal at any time via your account settings. Cancellation stops future charges but does not trigger a refund for the current paid period.</p>
-                <p><strong>2.3 Service After Cancellation:</strong> Your subscription will remain active until the end of the pre-paid period, after which your account will revert to free features (if available) or be deactivated.</p>
+                <p><strong>2.1 Auto-renewal.</strong> Subscriptions renew automatically at the end of each billing cycle (e.g., monthly or annual) unless you cancel before the renewal date.</p>
+                <p><strong>2.2 How to cancel (email only).</strong> To cancel auto-renewal, you must email <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a> from the email address linked to your account and clearly state that you wish to cancel your subscription. We may request information to verify your account.</p>
+                <p><strong>2.3 Cancellation timing.</strong> To avoid being charged for the next billing cycle, we must receive your cancellation email at least 48 hours before your renewal date/time (or such other timeframe stated at checkout). If you cancel after that point, your next renewal charge may still be processed.</p>
+                <p><strong>2.4 Access after cancellation.</strong> If you cancel, your subscription benefits remain available until the end of the then-current paid period, after which your account will revert to free features (if available).</p>
+                <p><strong>2.5 Confirmation.</strong> We will email a cancellation confirmation once processed. If you do not receive confirmation, please contact us again.</p>
               </div>
             </div>
 
-            {/* Section 3 */}
+            {/* Section 3 - UK/EU 14-Day Cancellation Right */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">3. Exceptional Circumstances for Refund Consideration</h3>
-              <p className="text-muted-foreground mb-4">We may, at our sole discretion, consider issuing a refund in the following exceptional circumstances:</p>
+              <h3 className="text-xl font-semibold text-foreground mb-4">3. UK/EU 14-Day Cancellation Right (Consumers)</h3>
+              <p className="text-muted-foreground mb-4">
+                If you are a consumer in the UK or EU/EEA and you purchase a subscription online, you may have a legal right to cancel within 14 days from the day after purchase (the "cooling-off period"), subject to rules for digital services.
+              </p>
+              <div className="space-y-3 text-muted-foreground">
+                <p><strong>3.1 Starting the service immediately.</strong> If you request immediate access to premium features during the 14-day period, you agree that we can start supplying the service right away. If you then cancel within the 14-day period, you may be required to pay a proportionate amount for the service supplied up to cancellation, where allowed by law.</p>
+                <p><strong>3.2 Digital content / immediate performance.</strong> Where the law allows the cooling-off right to be waived for certain digital content or immediate supply, we will only rely on that waiver where we have obtained your express consent and acknowledgement at checkout in the required form.</p>
+              </div>
+            </div>
+
+            {/* Section 4 - Discretionary Refunds */}
+            <div className="bg-card p-6 rounded-lg border">
+              <h3 className="text-xl font-semibold text-foreground mb-4">4. Discretionary Refunds (Exceptional Circumstances)</h3>
+              <p className="text-muted-foreground mb-4">In addition to any legal rights you may have, we may (at our sole discretion) consider refunds in limited cases such as:</p>
               <div className="space-y-3 text-muted-foreground">
                 <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Technical Failure:</strong> A significant, verified technical fault with the Opposia platform that prevented your reasonable use of the core paid services for a substantial portion of your subscription period.</p>
+                  <p><strong>4.1 Verified technical failure.</strong> A significant, verified technical issue that prevented reasonable use of core paid features for a substantial part of your paid period, and which we could not resolve within a reasonable time.</p>
                 </div>
                 <div className="pl-4 border-l-2 border-primary/30">
-                  <p><strong>Duplicate Charge:</strong> A demonstrable error where you were charged multiple times for the same subscription period.</p>
+                  <p><strong>4.2 Duplicate or erroneous charge.</strong> You were charged more than once for the same subscription period, or charged in error.</p>
+                </div>
+                <div className="pl-4 border-l-2 border-primary/30">
+                  <p><strong>4.3 Unauthorised payment.</strong> If you believe a payment was unauthorised, contact your bank/payment provider immediately and notify us. We may request evidence and may suspend the account to protect you and the platform.</p>
                 </div>
               </div>
-            </div>
-
-            {/* Section 4 */}
-            <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">4. How to Request a Refund</h3>
-              <div className="space-y-3 text-muted-foreground">
-                <p><strong>4.1</strong> To request a refund under the exceptional circumstances in Section 3, you must contact <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a> within 14 days of the charge in question.</p>
-                <p><strong>4.2</strong> You must provide your account username, the date and amount of the charge, and a detailed explanation and evidence supporting your request.</p>
-                <p><strong>4.3</strong> We will review your request and notify you of our decision within 14 business days. If a refund is granted, it will be issued to the original payment method within 10 business days.</p>
-              </div>
-            </div>
-
-            {/* Section 5 */}
-            <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">5. Your Statutory Rights</h3>
-              <p className="text-muted-foreground">
-                This policy does not affect your statutory rights under UK consumer law, including your right to a refund if the services we provide are not as described, not of satisfactory quality, or not fit for purpose. For more information on your statutory rights, visit the{' '}
-                <a href="https://www.citizensadvice.org.uk" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Citizens Advice website
-                </a>.
+              <p className="text-muted-foreground mt-4">
+                Discretionary refunds are not guaranteed. We do not refund for dissatisfaction with outcomes (e.g., not finding a match), user behaviour, or where you forgot to cancel.
               </p>
             </div>
 
-            {/* Section 6 */}
+            {/* Section 5 - How to Request a Refund */}
             <div className="bg-card p-6 rounded-lg border">
-              <h3 className="text-xl font-semibold text-foreground mb-4">6. Changes to this Policy</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">5. How to Request a Refund</h3>
+              <div className="space-y-3 text-muted-foreground">
+                <p><strong>5.1 Time limit.</strong> To request a discretionary refund under Section 4, email <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a> within 14 days of the charge.</p>
+                <p><strong>5.2 Information required.</strong> Provide:</p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>the email/username linked to your account;</li>
+                  <li>the date and amount of the charge;</li>
+                  <li>the subscription type (monthly/annual);</li>
+                  <li>a clear explanation and any supporting evidence (screenshots, error details, etc.).</li>
+                </ul>
+                <p><strong>5.3 Decision timeframe.</strong> We aim to respond within 14 business days. If approved, refunds are issued to the original payment method and may take 5–10 business days to appear, depending on your payment provider.</p>
+              </div>
+            </div>
+
+            {/* Section 6 - Chargebacks */}
+            <div className="bg-card p-6 rounded-lg border">
+              <h3 className="text-xl font-semibold text-foreground mb-4">6. Chargebacks</h3>
               <p className="text-muted-foreground">
-                We may update this Refund Policy. Material changes will be communicated to users via email or platform notification.
+                If you initiate a chargeback without a valid basis, we may suspend or terminate your account and recover reasonable administrative costs where permitted by law. Chargebacks do not remove your obligation to pay valid charges.
+              </p>
+            </div>
+
+            {/* Section 7 - Your Statutory Rights */}
+            <div className="bg-card p-6 rounded-lg border">
+              <h3 className="text-xl font-semibold text-foreground mb-4">7. Your Statutory Rights</h3>
+              <p className="text-muted-foreground">
+                Nothing in this Refund Policy limits your rights under applicable consumer law. In the UK, this includes rights where services are not provided with reasonable care and skill, are not as described, or where other statutory remedies apply.
+              </p>
+            </div>
+
+            {/* Section 8 - Changes to This Policy */}
+            <div className="bg-card p-6 rounded-lg border">
+              <h3 className="text-xl font-semibold text-foreground mb-4">8. Changes to This Policy</h3>
+              <p className="text-muted-foreground">
+                We may update this Refund Policy from time to time. Material changes will be communicated via the platform and/or email. The "Last Updated" date will be revised. You can always find the current version at{' '}
+                <Link to="/refund-policy" className="text-primary hover:underline">
+                  opposia.com/refund-policy
+                </Link>.
               </p>
             </div>
 
@@ -79,10 +113,9 @@ const RefundPolicyPage = () => {
               <h3 className="text-xl font-semibold text-foreground mb-4">Contact</h3>
               <div className="text-muted-foreground">
                 <p className="font-medium">Opposia Ltd</p>
-                <p>Company No. 16955158</p>
                 <p>167–169 Great Portland Street, 5th Floor, London, W1W 5PF</p>
                 <p className="mt-2">
-                  <strong>Email:</strong>{' '}
+                  <strong>Support:</strong>{' '}
                   <a href="mailto:support@opposia.com" className="text-primary hover:underline">
                     support@opposia.com
                   </a>
