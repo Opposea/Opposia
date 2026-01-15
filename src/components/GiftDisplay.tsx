@@ -88,26 +88,26 @@ const GiftDisplay: React.FC<GiftDisplayProps> = ({
           </div>
           
           {/* Gift name */}
-          <p className="text-center text-white font-bold text-lg mb-1 drop-shadow-md">
+          <p className="text-center font-bold text-lg mb-1 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
             {giftName}
           </p>
           
           {/* Sender info */}
           {!isOwn && senderName && (
-            <p className="text-center text-white/80 text-sm mb-2">
+            <p className="text-center text-sm mb-2 text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
               from {senderName}
             </p>
           )}
           
           {/* Message */}
           {message && (
-            <div className="mt-3 bg-white/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <p className="text-white text-sm text-center italic">"{message}"</p>
+            <div className="mt-3 bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <p className="text-white text-sm text-center italic drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">"{message}"</p>
             </div>
           )}
           
           {/* Timestamp */}
-          <p className="text-center text-white/60 text-xs mt-3">
+          <p className="text-center text-xs mt-3 text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
             {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
