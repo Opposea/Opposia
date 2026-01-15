@@ -297,8 +297,12 @@ const Quiz = () => {
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-romantic flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl space-y-6">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        <div className="w-full max-w-2xl space-y-6 relative z-10">
           <Card>
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-gradient-attraction rounded-full flex items-center justify-center mx-auto mb-4">
@@ -352,8 +356,14 @@ const Quiz = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-romantic pt-20">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-20 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8">
