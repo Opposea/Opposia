@@ -14,15 +14,16 @@ interface GiftSenderProps {
   receiverId: string;
   matchId: string;
   receiverName: string;
+  onGiftSent?: () => void;
 }
 
 const GIFT_OPTIONS = [
-  { id: 'rose', name: '🌹 Rose', icon: Flower2, price: 360, color: 'bg-pink-100 text-pink-800' },
-  { id: 'heart', name: '❤️ Heart', icon: Heart, price: 360, color: 'bg-red-100 text-red-800' },
-  { id: 'coffee', name: '☕ Coffee', icon: Coffee, price: 360, color: 'bg-amber-100 text-amber-800' },
+  { id: 'rose', name: '🌹 Rose', icon: Flower2, color: 'bg-pink-100 text-pink-800' },
+  { id: 'heart', name: '❤️ Heart', icon: Heart, color: 'bg-red-100 text-red-800' },
+  { id: 'coffee', name: '☕ Coffee', icon: Coffee, color: 'bg-amber-100 text-amber-800' },
 ];
 
-const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverName }) => {
+const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverName, onGiftSent }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGift, setSelectedGift] = useState<typeof GIFT_OPTIONS[0] | null>(null);
   const [message, setMessage] = useState('');
@@ -43,29 +44,28 @@ const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverNa
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-gift-checkout', {
-        body: {
-          giftId: selectedGift.id,
-          giftName: selectedGift.name,
-          giftPrice: selectedGift.price,
-          receiverId,
-          receiverName,
-          matchId,
-          message: message.trim() || undefined,
-        },
-      });
+      // Send gift directly without payment
+      const { error } = await supabase
+        .from('gifts')
+        .insert({
+          sender_id: user.id,
+          receiver_id: receiverId,
+          match_id: matchId,
+          gift_type: selectedGift.id,
+          gift_name: selectedGift.name,
+          message: message.trim() || null,
+          status: 'sent',
+        });
 
       if (error) throw error;
 
-      if (data?.url) {
-        toast.success('Redirecting to secure checkout...');
-        window.open(data.url, '_blank');
-        setIsOpen(false);
-      } else {
-        throw new Error('No checkout URL received');
-      }
+      toast.success(`${selectedGift.name} sent to ${receiverName}!`);
+      setIsOpen(false);
+      setSelectedGift(null);
+      setMessage('');
+      onGiftSent?.();
     } catch (error: any) {
-      toast.error('Failed to create checkout session');
+      toast.error('Failed to send gift');
     } finally {
       setIsLoading(false);
     }
@@ -104,9 +104,6 @@ const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverNa
                         <IconComponent className="w-6 h-6" />
                       </div>
                       <p className="text-sm font-medium">{gift.name}</p>
-                      <Badge variant="secondary" className="text-xs mt-1">
-                        £{(gift.price / 100).toFixed(2)}
-                      </Badge>
                     </CardContent>
                   </Card>
                 );
