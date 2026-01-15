@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Send, Gift, Trash2, ArrowLeft } from 'lucide-react';
+import { Send, Gift, Trash2, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { sanitizeInput, escapeHtml } from '@/lib/security';
+import { formatDistanceToNow } from 'date-fns';
 
 import GiftSender from './GiftSender';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
+import TypingIndicator from './TypingIndicator';
 
 interface Message {
   id: string;
@@ -21,6 +23,7 @@ interface Message {
   sender_id: string;
   created_at: string;
   is_read: boolean;
+  read_at?: string;
 }
 
 interface Gift {
@@ -59,6 +62,9 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
   const [unreadGiftsCount, setUnreadGiftsCount] = useState(0);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -84,7 +90,10 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
     if (selectedMatch) {
       fetchMessages();
       fetchGifts();
-      setupRealtimeSubscription();
+      fetchLastSeen();
+      const cleanup = setupRealtimeSubscription();
+      markMessagesAsRead();
+      return cleanup;
     }
   }, [selectedMatch]);
 
@@ -133,8 +142,61 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
     }
   };
 
+  const fetchLastSeen = async () => {
+    if (!selectedMatch || !user) return;
+    const otherUserId = selectedMatch.user1_id === user.id ? selectedMatch.user2_id : selectedMatch.user1_id;
+    
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('updated_at')
+        .eq('user_id', otherUserId)
+        .single();
+      
+      if (data?.updated_at) {
+        setLastSeen(data.updated_at);
+      }
+    } catch (error) {
+      // Silent fail
+    }
+  };
+
+  const markMessagesAsRead = async () => {
+    if (!selectedMatch || !user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq('match_id', selectedMatch.id)
+        .neq('sender_id', user.id)
+        .eq('is_read', false);
+      
+      if (!error) {
+        setMessages(prev => prev.map(msg => 
+          msg.sender_id !== user.id ? { ...msg, is_read: true, read_at: new Date().toISOString() } : msg
+        ));
+      }
+    } catch (error) {
+      // Silent fail
+    }
+  };
+
+  const handleTyping = useCallback(() => {
+    if (!selectedMatch || !user) return;
+    
+    const channel = supabase.channel(`typing:${selectedMatch.id}`);
+    channel.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { user_id: user.id }
+    });
+  }, [selectedMatch, user]);
+
   const setupRealtimeSubscription = () => {
-    if (!selectedMatch) return;
+    if (!selectedMatch || !user) return;
+
+    const otherUserId = selectedMatch.user1_id === user.id ? selectedMatch.user2_id : selectedMatch.user1_id;
 
     const messagesChannel = supabase
       .channel(`messages:${selectedMatch.id}`)
@@ -142,6 +204,16 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `match_id=eq.${selectedMatch.id}` },
         (payload) => {
           setMessages(prev => [...prev, payload.new as Message]);
+          // Mark as read if the chat is open
+          if (payload.new.sender_id !== user.id) {
+            markMessagesAsRead();
+          }
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `match_id=eq.${selectedMatch.id}` },
+        (payload) => {
+          setMessages(prev => prev.map(msg => msg.id === payload.new.id ? payload.new as Message : msg));
         }
       )
       .on('postgres_changes',
@@ -152,8 +224,28 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
       )
       .subscribe();
 
+    // Typing indicator channel
+    const typingChannel = supabase
+      .channel(`typing:${selectedMatch.id}`)
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        if (payload.payload.user_id === otherUserId) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+          typingTimeoutRef.current = setTimeout(() => {
+            setIsOtherTyping(false);
+          }, 3000);
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   };
 
@@ -322,7 +414,15 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                     <h3 className="font-semibold text-sm md:text-lg truncate">{selectedMatch.profiles?.name}</h3>
                     <VerificationBadge verified={Math.random() > 0.5} size="sm" />
                   </div>
-                  <p className="text-xs text-muted-foreground hidden md:block">Active now</p>
+                  <p className="text-xs text-muted-foreground hidden md:block">
+                    {isOtherTyping ? (
+                      <span className="text-primary">Typing...</span>
+                    ) : lastSeen ? (
+                      `Last seen ${formatDistanceToNow(new Date(lastSeen), { addSuffix: true })}`
+                    ) : (
+                      'Active now'
+                    )}
+                  </p>
                 </div>
               </div>
               <TooltipProvider>
@@ -398,13 +498,36 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                           </button>
                         )}
                         <p className="break-words">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-2">
-                          {new Date(message.created_at).toLocaleTimeString()}
-                        </p>
+                        <div className="flex items-center justify-end gap-1 mt-2">
+                          <p className="text-xs opacity-70">
+                            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          {isOwn && (
+                            <span className="text-xs opacity-70">
+                              {message.is_read ? (
+                                <CheckCheck className="w-4 h-4 text-blue-300" />
+                              ) : (
+                                <Check className="w-4 h-4" />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                        {isOwn && message.is_read && message.read_at && (
+                          <p className="text-[10px] opacity-50 text-right">
+                            Read {formatDistanceToNow(new Date(message.read_at), { addSuffix: true })}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
                 })}
+              {isOtherTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-card text-card-foreground border p-3 rounded-2xl shadow-soft">
+                    <TypingIndicator />
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
@@ -412,7 +535,10 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
             <div className="p-3 md:p-4 border-t bg-background flex gap-2 md:gap-3">
               <Input
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={(e) => {
+                  setNewMessage(e.target.value);
+                  handleTyping();
+                }}
                 placeholder="Type your message..."
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={sending}
