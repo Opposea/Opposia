@@ -57,25 +57,6 @@ const CTA = () => {
           </Button>
         </div>
         
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <a 
-            href="https://buy.stripe.com/4gM6oHayDe1G6Mk7BXgfu01" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2"
-            >
-              <Heart className="w-5 h-5 fill-current" />
-              Support Opposia
-            </Button>
-          </a>
-          <p className="text-white/60 text-sm mt-3">
-            Help us keep bringing opposites together
-          </p>
-        </div>
       </div>
       
       {/* Background decoration */}

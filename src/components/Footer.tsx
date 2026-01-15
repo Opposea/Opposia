@@ -52,19 +52,6 @@ const Footer = () => {
           </div>
         </div>
         
-        {/* Donation Section */}
-        <div className="border-t border-background/20 pt-8 pb-8 text-center">
-          <p className="text-background/80 mb-4 text-lg">Support Opposia</p>
-          <a href="https://buy.stripe.com/4gM6oHayDe1G6Mk7BXgfu01" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="lg" className="bg-background/10 border-background/30 text-background hover:bg-background/20 gap-2">
-              <Heart className="w-5 h-5 fill-current" />
-              Donate
-            </Button>
-          </a>
-          <p className="text-background/60 text-sm mt-3">
-            Help us keep matching how you live
-          </p>
-        </div>
         
         {/* Bottom */}
         <div className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
