@@ -16,171 +16,177 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 const quizQuestions = [
   {
     id: "gender",
-    question: "What is your gender?",
+    question: "How do you describe your gender?",
     options: [
-      { value: "male", label: "Male" },
-      { value: "female", label: "Female" },
-      { value: "non-binary/trans", label: "Non-binary/Trans" }
+      { value: "man", label: "Man" },
+      { value: "woman", label: "Woman" },
+      { value: "non-binary", label: "Non-binary" },
+      { value: "trans-man", label: "Trans man" },
+      { value: "trans-woman", label: "Trans woman" },
+      { value: "prefer-not-to-say", label: "Prefer not to say" }
     ]
   },
   {
     id: "sexual_orientation",
-    question: "What is your sexual orientation?",
+    question: "Which best describes your sexual orientation?",
     options: [
       { value: "straight", label: "Straight" },
       { value: "gay", label: "Gay" },
       { value: "lesbian", label: "Lesbian" },
-      { value: "bi", label: "Bi" },
-      { value: "pansexual", label: "Pansexual" }
+      { value: "bisexual", label: "Bisexual" },
+      { value: "pansexual", label: "Pansexual" },
+      { value: "queer", label: "Queer" },
+      { value: "prefer-not-to-say", label: "Prefer not to say" }
     ]
   },
   {
     id: "cooking",
-    question: "Do you enjoy cooking?",
+    question: "In day-to-day life, what's your relationship with cooking?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "love", label: "I love cooking" },
+      { value: "sometimes", label: "I like to cook sometimes — I like to share it" },
+      { value: "rather-not", label: "I'd rather not" },
+      { value: "together", label: "I prefer cooking together" }
     ]
   },
   {
     id: "dishes",
-    question: "Do you enjoy doing the dishes?",
+    question: "How do you feel about washing up and keeping the kitchen clean?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "dont-mind", label: "I don't mind it" },
+      { value: "sometimes", label: "I'll do it sometimes — I like to share it" },
+      { value: "dont-enjoy", label: "I really don't enjoy it" },
+      { value: "together", label: "I prefer doing it together" }
     ]
   },
   {
     id: "driving",
-    question: "Do you enjoy being the one who drives on a long trip?",
+    question: "On longer trips, what's your driving style?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" }
+      { value: "main-driver", label: "I'm the main driver — I like being in charge of the route" },
+      { value: "share", label: "I like to share it" },
+      { value: "rather-not", label: "I'd rather not drive — I prefer my partner to drive" },
+      { value: "together", label: "I prefer driving together (switching often / co-pilot teamwork)" }
     ]
   },
   {
     id: "finances",
-    question: "Do you enjoy handling the finances and budgeting?",
+    question: "When it comes to money admin (bills, budgeting, keeping things on track), what suits you?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "lead", label: "I like managing it — I'm happy to take the lead" },
+      { value: "share", label: "I'm comfortable sharing it" },
+      { value: "rather-not", label: "I'd rather not — I prefer my partner handles it" },
+      { value: "together", label: "I prefer doing it together (full transparency, decisions together)" }
     ]
   },
   {
     id: "planning_events",
-    question: "Do you enjoy planning social events and get-togethers?",
+    question: "For social plans (dinners, weekends, friend catch-ups), what role do you naturally take?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "organiser", label: "I'm the organiser — I enjoy planning" },
+      { value: "sometimes", label: "I'll plan sometimes / I can share it" },
+      { value: "rather-not", label: "I'd rather not — I prefer someone else leads" },
+      { value: "together", label: "I prefer planning together" }
     ]
   },
   {
     id: "fixing_things",
-    question: "Do you enjoy being the one who assembles furniture and fixes things?",
+    question: "If something needs fixing (or furniture needs assembling), what's your vibe?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "fixer", label: "I'm the fixer — I'll take the lead" },
+      { value: "basics", label: "I can do basics / happy to help" },
+      { value: "not-my-thing", label: "Not my thing — I'd prefer my partner handles it" },
+      { value: "together", label: "I prefer tackling it together" }
     ]
   },
   {
     id: "decorating",
-    question: "Do you enjoy being the one who decorates the home?",
+    question: "When it comes to decorating and creating the \"feel\" of a home, what best describes you?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "love-lead", label: "I love it — I'm happy to lead" },
+      { value: "sometimes", label: "I enjoy it sometimes / happy to collaborate" },
+      { value: "not-into-it", label: "I'm not into it — I'd prefer my partner leads" },
+      { value: "together", label: "I prefer deciding together" }
     ]
   },
   {
     id: "grocery_shopping",
-    question: "Do you enjoy grocery shopping?",
+    question: "How do you feel about grocery shopping / stocking the house?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "dont-mind", label: "I don't mind it — I'm happy to take the lead" },
+      { value: "sometimes", label: "I'll do it sometimes / happy to share it" },
+      { value: "dont-enjoy", label: "I really don't enjoy it — I'd prefer my partner does it" },
+      { value: "together", label: "I prefer doing it together" }
     ]
   },
   {
     id: "customer_service",
-    question: "Do you enjoy being the one who talks to customer service on the phone?",
+    question: "When something needs sorting (delivery issue, bills, cancellations), are you the one who handles it?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "yes", label: "Yes — I'll handle it, no problem" },
+      { value: "share", label: "I can, but I'd rather share it" },
+      { value: "prefer-partner", label: "I'd strongly prefer my partner handles it" },
+      { value: "together", label: "I prefer doing it together (speakerphone teamwork)" }
     ]
   },
   {
     id: "making_bed",
-    question: "Do you make the bed in the morning?",
+    question: "In the morning, how do you feel about making the bed / doing a quick reset?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "matters", label: "It matters to me — I usually do it" },
+      { value: "sometimes", label: "I do it sometimes" },
+      { value: "rarely", label: "I rarely do it — I'd prefer my partner cares more about this" },
+      { value: "together", label: "I prefer doing it together / shared routine" }
     ]
   },
   {
     id: "gardening",
-    question: "Do you enjoy gardening and outdoor yard work?",
+    question: "What's your relationship with outdoor upkeep (plants, garden, yard work)?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "enjoy-lead", label: "I enjoy it — I'm happy to take the lead" },
+      { value: "sometimes", label: "I'll do it sometimes / happy to help" },
+      { value: "not-for-me", label: "Not for me — I'd prefer my partner handles it" },
+      { value: "together", label: "I prefer doing it together" }
     ]
   },
   {
     id: "packing_trips",
-    question: "Do you enjoy being the one who packs for trips?",
+    question: "Before a trip, what's your packing style?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "planner", label: "I'm the planner/packer — I like to take the lead" },
+      { value: "pack-fine", label: "I pack fine — happy to share it" },
+      { value: "last-minute", label: "I'm a last-minute packer — I'd prefer my partner leads" },
+      { value: "together", label: "I prefer packing together" }
     ]
   },
   {
     id: "planning_birthdays",
-    question: "Do you enjoy being the one who plans for birthdays and holidays?",
+    question: "For birthdays/holidays, how do you approach planning and making it special?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "love-lead", label: "I love it — I'm happy to lead" },
+      { value: "contribute", label: "I'll contribute / share it" },
+      { value: "not-great", label: "I'm not great at it" },
+      { value: "together", label: "I prefer planning together" }
     ]
   },
   {
     id: "picking_movies",
-    question: "Do you enjoy being the one who picks the movie or show to watch?",
+    question: "On a night in, how do you prefer choosing what to watch?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "chooser", label: "I'm the chooser — I like picking" },
+      { value: "easy", label: "I'm easy — happy to take turns" },
+      { value: "rather-not", label: "I'd rather someone else choose" },
+      { value: "together", label: "I prefer choosing together (agreeing on a vibe first)" }
     ]
   },
   {
     id: "initiating_social",
-    question: "Do you enjoy being the one who initiates social plans with friends?",
+    question: "With friends/family, who usually gets the plan moving?",
     options: [
-      { value: "yes", label: "Yes" },
-      { value: "sometimes", label: "Sometimes" },
-      { value: "no", label: "No" },
-      { value: "together", label: "Likes to do it together" }
+      { value: "me", label: "Me — I naturally initiate and organise" },
+      { value: "sometimes", label: "Sometimes me, sometimes them" },
+      { value: "usually-not", label: "I usually don't — I prefer my partner initiates" },
+      { value: "together", label: "I prefer initiating together" }
     ]
   }
 ];
