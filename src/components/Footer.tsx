@@ -13,7 +13,7 @@ const Footer = () => {
               
             </div>
             <p className="text-background/70 mb-6 max-w-md leading-relaxed">
-              We match how you live. 
+              We match how you live — because compatibility is practical. 
               Find your compatible match and discover love through meaningful relationships.
             </p>
             <div className="flex gap-4">
