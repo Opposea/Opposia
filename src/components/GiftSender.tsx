@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Coffee, Flower2, Gift } from 'lucide-react';
+import { Heart, Coffee, Flower2, Gift, Star, Candy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +21,9 @@ const GIFT_OPTIONS = [
   { id: 'rose', name: '🌹 Rose', icon: Flower2, color: 'bg-pink-100 text-pink-800' },
   { id: 'heart', name: '❤️ Heart', icon: Heart, color: 'bg-red-100 text-red-800' },
   { id: 'coffee', name: '☕ Coffee', icon: Coffee, color: 'bg-amber-100 text-amber-800' },
+  { id: 'star', name: '⭐ Star', icon: Star, color: 'bg-yellow-100 text-yellow-800' },
+  { id: 'flowers', name: '💐 Flowers', icon: Flower2, color: 'bg-purple-100 text-purple-800' },
+  { id: 'chocolate', name: '🍫 Chocolate', icon: Candy, color: 'bg-amber-100 text-amber-900' },
 ];
 
 const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverName, onGiftSent }) => {
@@ -87,7 +90,7 @@ const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverNa
           {/* Gift Selection */}
           <div>
             <h4 className="font-medium mb-3">Choose a Gift</h4>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {GIFT_OPTIONS.map((gift) => {
                 const IconComponent = gift.icon;
                 const isSelected = selectedGift?.id === gift.id;
