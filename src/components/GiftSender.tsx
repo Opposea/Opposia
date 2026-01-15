@@ -14,6 +14,7 @@ interface GiftSenderProps {
   receiverId: string;
   matchId: string;
   receiverName: string;
+  onGiftSent?: () => void;
 }
 
 const GIFT_OPTIONS = [
@@ -22,7 +23,7 @@ const GIFT_OPTIONS = [
   { id: 'coffee', name: '☕ Coffee', icon: Coffee, color: 'bg-amber-100 text-amber-800' },
 ];
 
-const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverName }) => {
+const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverName, onGiftSent }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGift, setSelectedGift] = useState<typeof GIFT_OPTIONS[0] | null>(null);
   const [message, setMessage] = useState('');
@@ -62,6 +63,7 @@ const GiftSender: React.FC<GiftSenderProps> = ({ receiverId, matchId, receiverNa
       setIsOpen(false);
       setSelectedGift(null);
       setMessage('');
+      onGiftSent?.();
     } catch (error: any) {
       toast.error('Failed to send gift');
     } finally {
