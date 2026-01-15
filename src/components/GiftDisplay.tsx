@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Coffee, Flower2, Sparkles } from 'lucide-react';
+import { Heart, Coffee, Flower2, Sparkles, Star, Candy } from 'lucide-react';
 
 interface GiftDisplayProps {
   giftType: string;
@@ -37,6 +37,27 @@ const GIFT_CONFIGS: Record<string, {
     icon: Coffee,
     animation: '',
     bgPattern: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 60%)',
+  },
+  star: {
+    emoji: '⭐',
+    gradient: 'from-yellow-300 via-amber-400 to-yellow-500',
+    icon: Star,
+    animation: 'animate-spin',
+    bgPattern: 'radial-gradient(circle at 40% 40%, rgba(255,255,255,0.25) 0%, transparent 50%)',
+  },
+  flowers: {
+    emoji: '💐',
+    gradient: 'from-purple-400 via-fuchsia-500 to-pink-500',
+    icon: Flower2,
+    animation: '',
+    bgPattern: 'radial-gradient(circle at 60% 40%, rgba(255,255,255,0.2) 0%, transparent 55%)',
+  },
+  chocolate: {
+    emoji: '🍫',
+    gradient: 'from-amber-700 via-amber-800 to-amber-900',
+    icon: Candy,
+    animation: '',
+    bgPattern: 'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.15) 0%, transparent 50%)',
   },
 };
 
