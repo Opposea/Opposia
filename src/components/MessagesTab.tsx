@@ -16,6 +16,7 @@ import GiftSender from './GiftSender';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
 import TypingIndicator from './TypingIndicator';
+import GiftDisplay from './GiftDisplay';
 
 interface Message {
   id: string;
@@ -434,6 +435,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                           receiverId={getOtherUser(selectedMatch)}
                           matchId={selectedMatch.id}
                           receiverName={selectedMatch.profiles?.name || 'User'}
+                          onGiftSent={fetchGifts}
                         />
                         {unreadGiftsCount > 0 && (
                           <Badge 
@@ -464,22 +466,14 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                   if (isGift) {
                     const gift = item as Gift & { type: 'gift' };
                     return (
-                      <div key={gift.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs p-4 rounded-2xl shadow-soft ${
-                          isOwn ? 'bg-primary text-primary-foreground' : 'bg-card text-card-foreground border'
-                        }`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Gift className="w-5 h-5" />
-                            <span className="font-semibold">{gift.gift_name}</span>
-                          </div>
-                          {gift.message && (
-                            <p className="text-sm mb-2">{gift.message}</p>
-                          )}
-                          <p className="text-xs opacity-70">
-                            {new Date(gift.created_at).toLocaleTimeString()}
-                          </p>
-                        </div>
-                      </div>
+                      <GiftDisplay
+                        key={gift.id}
+                        giftType={gift.gift_type}
+                        giftName={gift.gift_name}
+                        message={gift.message}
+                        isOwn={isOwn}
+                        timestamp={gift.created_at}
+                      />
                     );
                   }
 
