@@ -35,7 +35,6 @@ const quizQuestions = [
       { value: "lesbian", label: "Lesbian" },
       { value: "bisexual", label: "Bisexual" },
       { value: "pansexual", label: "Pansexual" },
-      { value: "queer", label: "Queer" },
       { value: "prefer-not-to-say", label: "Prefer not to say" }
     ]
   },
