@@ -82,6 +82,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState<string | null>(null);
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -354,6 +355,37 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
     }
   };
 
+  const deleteConversation = async (matchId: string) => {
+    try {
+      // Delete all messages in the conversation
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('match_id', matchId);
+
+      if (error) {
+        toast.error('Failed to delete conversation');
+        return;
+      }
+
+      // Clear local messages if it's the selected match
+      if (selectedMatch?.id === matchId) {
+        setMessages([]);
+      }
+      
+      setConversationToDelete(null);
+      toast.success('Conversation deleted');
+    } catch (error: any) {
+      toast.error('An error occurred while deleting the conversation');
+    }
+  };
+
+  const confirmDeleteConversation = () => {
+    if (conversationToDelete) {
+      deleteConversation(conversationToDelete);
+    }
+  };
+
 
   const getOtherUser = (match: Match) => {
     return match.user1_id === user?.id ? match.user2_id : match.user1_id;
@@ -374,6 +406,23 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <AlertDialog open={!!conversationToDelete} onOpenChange={(open) => !open && setConversationToDelete(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete entire conversation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete all messages in this conversation. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDeleteConversation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Delete Conversation
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -401,7 +450,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
             matches.map((match) => (
               <div
                 key={match.id}
-                className={`p-4 border-b cursor-pointer transition-all ${
+                className={`p-4 border-b cursor-pointer transition-all group/conv ${
                   selectedMatch?.id === match.id 
                     ? 'bg-primary/10 border-l-4 border-l-primary' 
                     : 'hover:bg-muted/50'
@@ -429,6 +478,25 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                       {selectedMatch?.id === match.id ? 'Active now' : 'Click to open chat'}
                     </p>
                   </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <button className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center opacity-0 group-hover/conv:opacity-100 transition-opacity">
+                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConversationToDelete(match.id);
+                        }}
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete conversation
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             ))
@@ -504,6 +572,23 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                       <p>Send a virtual gift to {selectedMatch.profiles?.name}</p>
                     </TooltipContent>
                   </Tooltip>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                        <MoreVertical className="w-5 h-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem 
+                        onClick={() => setConversationToDelete(selectedMatch.id)}
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete conversation
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TooltipProvider>
             </div>
