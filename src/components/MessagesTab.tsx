@@ -5,7 +5,23 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Send, Gift, Trash2, ArrowLeft, Check, CheckCheck } from 'lucide-react';
+import { Send, Gift, Trash2, ArrowLeft, Check, CheckCheck, MoreVertical } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -65,6 +81,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
   const [sending, setSending] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -218,6 +235,12 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
         }
       )
       .on('postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'messages', filter: `match_id=eq.${selectedMatch.id}` },
+        (payload) => {
+          setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
+        }
+      )
+      .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'gifts', filter: `match_id=eq.${selectedMatch.id}` },
         (payload) => {
           setGifts(prev => [...prev, payload.new as Gift]);
@@ -316,6 +339,18 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
       toast.success('Message deleted');
     } catch (error: any) {
       toast.error('An error occurred while deleting the message');
+    } finally {
+      setMessageToDelete(null);
+    }
+  };
+
+  const handleDeleteClick = (messageId: string) => {
+    setMessageToDelete(messageId);
+  };
+
+  const confirmDelete = () => {
+    if (messageToDelete) {
+      deleteMessage(messageToDelete);
     }
   };
 
@@ -326,6 +361,24 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
 
 
   return (
+    <>
+    <AlertDialog open={!!messageToDelete} onOpenChange={(open) => !open && setMessageToDelete(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete message?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. The message will be permanently deleted from the conversation.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    
     <Card className="flex flex-col md:flex-row h-[700px] shadow-elegant overflow-hidden">
       {/* Matches List */}
       <div className={`w-full md:w-1/3 border-r bg-muted/30 ${selectedMatch ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
@@ -480,18 +533,31 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
                   const message = item as Message;
                   return (
                     <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group`}>
-                      <div className={`relative max-w-xs p-4 rounded-2xl shadow-soft ${
+                      <div className={`relative max-w-xs md:max-w-sm lg:max-w-md p-4 rounded-2xl shadow-soft ${
                         isOwn ? 'bg-primary text-primary-foreground' : 'bg-card text-card-foreground border'
                       }`}>
                         {isOwn && (
-                          <button
-                            onClick={() => deleteMessage(message.id)}
-                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:scale-110"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/10 hover:bg-black/20 md:opacity-0 md:group-hover:opacity-100 transition-all flex items-center justify-center"
+                                aria-label="Message options"
+                              >
+                                <MoreVertical className="w-3.5 h-3.5" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteClick(message.id)}
+                                className="text-destructive focus:text-destructive cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete message
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
-                        <p className="break-words">{message.content}</p>
+                        <p className="break-words pr-6">{message.content}</p>
                         <div className="flex items-center justify-end gap-1 mt-2">
                           <p className="text-xs opacity-70">
                             {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -561,6 +627,7 @@ const MessagesTab: React.FC<MessagesTabProps> = ({ matches, preselectedMatchId }
         )}
       </div>
     </Card>
+    </>
   );
 };
 
