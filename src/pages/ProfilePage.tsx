@@ -909,8 +909,14 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-28 pb-8 px-4 md:px-8">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen pt-28 pb-8 px-4 md:px-8 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+      <div className="absolute top-32 left-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-accent/8 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto max-w-6xl relative z-10">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6 h-auto p-2 gap-1.5 md:gap-2 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm shadow-lg rounded-xl border border-primary/20">
             <TabsTrigger value="profile" className="flex flex-col items-center gap-1 py-2 px-1 md:py-3 md:px-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white rounded-lg">
