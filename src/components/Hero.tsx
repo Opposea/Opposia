@@ -19,6 +19,9 @@ const Hero = () => {
         
         <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
           <span className="text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">We Match How You Live</span>
+          <span className="block text-lg md:text-2xl font-medium mt-2 text-white/90 [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
+            Because compatibility is practical
+          </span>
         </h1>
         
         <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
