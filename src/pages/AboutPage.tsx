@@ -12,7 +12,7 @@ const AboutPage = () => {
             About Opposia
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            We match on life, creating a better you. The dating app that celebrates differences and creates lasting connections.
+            We match how you live. The dating app that celebrates differences and creates lasting connections.
           </p>
         </div>
       </div>

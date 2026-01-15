@@ -13,7 +13,7 @@ const Footer = () => {
               
             </div>
             <p className="text-background/70 mb-6 max-w-md leading-relaxed">
-              We match on life, creating a better you. 
+              We match how you live. 
               Find your compatible match and discover love through meaningful relationships.
             </p>
             <div className="flex gap-4">
@@ -62,7 +62,7 @@ const Footer = () => {
             </Button>
           </a>
           <p className="text-background/60 text-sm mt-3">
-            Help us keep matching you on life
+            Help us keep matching how you live
           </p>
         </div>
         
