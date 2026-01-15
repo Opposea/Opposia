@@ -69,7 +69,7 @@ const BlogPage = () => {
             Opposia Blog
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Insights, tips, and stories about matching on life and creating a better you.
+            Insights, tips, and stories about matching how you live.
           </p>
         </div>
       </div>
