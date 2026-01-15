@@ -31,7 +31,8 @@ const PrivacyPage = () => {
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-xl font-semibold text-foreground mb-4">1. Who We Are (Controller)</h3>
                 <div className="space-y-3 text-muted-foreground">
-                  <p>Opposia Ltd ("Opposia", "we", "us", "our") is a company registered in England and Wales (Company No. 16955158) with its registered office at 167–169 Great Portland Street, 5th Floor, London, W1W 5PF. We operate the Opposia website, apps, and related services (the "Service").</p>
+                  <p>Opposia Ltd will be referred to as ("Opposia", "we", "us", "our") during this Privacy policy and throughout our terms of service.</p>
+                  <p>Opposia Ltd is a registered private company in England and Wales (Company No. 16955158) we have a registered office at 167–169 Great Portland Street, 5th Floor, London, W1W 5PF. We operate the Opposia website, apps, and related services (the "Service").</p>
                   <p>For the purposes of the UK General Data Protection Regulation ("UK GDPR") and the Data Protection Act 2018 ("DPA 2018"), Opposia Ltd is the data controller.</p>
                   <p><strong>General Contact:</strong> <a href="mailto:admin@opposia.com" className="text-primary hover:underline">admin@opposia.com</a></p>
                   <p><strong>Privacy Complaints:</strong> <a href="mailto:support@opposia.com" className="text-primary hover:underline">support@opposia.com</a></p>
