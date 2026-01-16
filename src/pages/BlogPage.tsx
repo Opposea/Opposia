@@ -144,7 +144,7 @@ const BlogPage = () => {
             Stay Updated on Love & Relationships
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Get the latest articles on dating, relationships, and finding your perfect opposite delivered to your inbox.
+            Get the latest articles on dating, relationships, and compatibility delivered to your inbox.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <input
@@ -161,7 +161,7 @@ const BlogPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Find Your Opposite?
+            Ready to see who you're compatible with?
           </h2>
           <p className="text-xl text-white/90 mb-8">
             Take our compatibility quiz and start your journey today.

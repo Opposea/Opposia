@@ -18,12 +18,12 @@ const CTA = () => {
     <section className="py-20 bg-gradient-hero relative overflow-hidden">
       <div className="container mx-auto px-6 text-center relative z-10">
         <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-          Ready to Find Your
-          <span className="block">Perfect Opposite?</span>
+          Ready to see who
+          <span className="block">you're compatible with?</span>
         </h2>
         
         <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Join thousands of people who've discovered that their perfect match was their perfect opposite all along.
+          Join thousands of people who've discovered meaningful connections through compatibility.
         </p>
         
         <div className="max-w-md mx-auto mb-8">

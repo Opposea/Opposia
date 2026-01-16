@@ -12,7 +12,7 @@ const AboutPage = () => {
             About Opposia
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            We match how you live — because compatibility is practical. The dating app that celebrates differences and creates lasting connections.
+            Celebrating differences in life skills turning differences into compatibility.
           </p>
         </div>
       </div>
@@ -108,7 +108,7 @@ const AboutPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Find Your Opposite?
+            Ready to see who you're compatible with?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Take our compatibility quiz and discover the person who complements you perfectly.

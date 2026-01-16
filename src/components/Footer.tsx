@@ -13,8 +13,7 @@ const Footer = () => {
               
             </div>
             <p className="text-background/70 mb-6 max-w-md leading-relaxed">
-              We match how you live — because compatibility is practical. 
-              Find your compatible match and discover love through meaningful relationships.
+              We match how you live — because compatibility is practical.
             </p>
             <div className="flex gap-4">
               <Twitter className="w-6 h-6 text-background/60 hover:text-secondary cursor-pointer transition-colors" />

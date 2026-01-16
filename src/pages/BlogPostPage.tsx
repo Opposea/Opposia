@@ -241,7 +241,7 @@ const BlogPostPage = () => {
       <section className="py-20 bg-gradient-hero text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Find Your Opposite?
+            Ready to see who you're compatible with?
           </h2>
           <p className="text-xl text-white/90 mb-8">
             Take our compatibility quiz and start your journey today.

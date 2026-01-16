@@ -24,7 +24,7 @@ const Features = () => {
   }, {
     icon: <Infinity className="w-8 h-8" />,
     title: "Endless Possibilities",
-    description: "With millions of unique personality combinations, your perfect opposite is waiting to be discovered."
+    description: "With millions of unique personality combinations, your compatible match is waiting to be discovered."
   }];
   return <section aria-labelledby="features-heading" className="py-20 bg-background">
       <div className="container mx-auto px-6">
