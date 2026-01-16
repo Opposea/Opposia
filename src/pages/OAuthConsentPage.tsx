@@ -7,6 +7,31 @@ import { Shield, User, Heart, MessageCircle, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext';
 import logo from '@/assets/opposia-logo-new.png';
 
+const buildAllowedRedirectOrigins = () => {
+  const originSet = new Set<string>();
+  const envOrigins = import.meta.env.VITE_OAUTH_ALLOWED_REDIRECT_ORIGINS as string | undefined;
+
+  if (envOrigins) {
+    envOrigins
+      .split(',')
+      .map(origin => origin.trim())
+      .filter(Boolean)
+      .forEach(origin => originSet.add(origin));
+  }
+
+  if (typeof window !== 'undefined') {
+    originSet.add(window.location.origin);
+  }
+
+  return originSet;
+};
+
+const isSafeRedirect = (url: URL, allowedOrigins: Set<string>) => {
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(url.hostname);
+  const protocolAllowed = url.protocol === 'https:' || (url.protocol === 'http:' && isLocalhost);
+  return protocolAllowed && allowedOrigins.has(url.origin);
+};
+
 const OAuthConsentPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -24,6 +49,25 @@ const OAuthConsentPage = () => {
   const scope = searchParams.get('scope') || 'profile email';
   const state = searchParams.get('state');
   const responseType = searchParams.get('response_type');
+  const allowedRedirectOrigins = buildAllowedRedirectOrigins();
+
+  const redirectValidation = (() => {
+    if (!redirectUri) {
+      return { url: null, error: 'Missing redirect_uri parameter.' };
+    }
+
+    try {
+      const parsed = new URL(redirectUri);
+
+      if (!isSafeRedirect(parsed, allowedRedirectOrigins)) {
+        return { url: null, error: 'Redirect URI is not allowlisted.' };
+      }
+
+      return { url: parsed, error: null };
+    } catch {
+      return { url: null, error: 'Redirect URI is invalid.' };
+    }
+  })();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -71,11 +115,12 @@ const OAuthConsentPage = () => {
 
   const handleConsent = async (approved: boolean) => {
     setIsProcessing(true);
+    const safeRedirect = redirectValidation.url;
 
     if (!approved) {
       // User denied - redirect back with error
-      if (redirectUri) {
-        const errorUrl = new URL(redirectUri);
+      if (safeRedirect) {
+        const errorUrl = new URL(safeRedirect.toString());
         errorUrl.searchParams.set('error', 'access_denied');
         errorUrl.searchParams.set('error_description', 'User denied the authorization request');
         if (state) errorUrl.searchParams.set('state', state);
@@ -92,8 +137,8 @@ const OAuthConsentPage = () => {
     // 3. Redirect with the code
     
     // For now, simulate success
-    if (redirectUri) {
-      const successUrl = new URL(redirectUri);
+    if (safeRedirect) {
+      const successUrl = new URL(safeRedirect.toString());
       // In production, this would be a real authorization code
       successUrl.searchParams.set('code', 'demo_authorization_code');
       if (state) successUrl.searchParams.set('state', state);
@@ -130,6 +175,32 @@ const OAuthConsentPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Return to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (responseType !== 'code' || redirectValidation.error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <CardTitle>Invalid Request</CardTitle>
+            <CardDescription>
+              This authorization request contains unsupported or invalid parameters. Please contact the application
+              owner.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {responseType !== 'code' && <p>Unsupported response_type. Only "code" is allowed.</p>}
+              {redirectValidation.error && <p>{redirectValidation.error}</p>}
+            </div>
             <Button onClick={() => navigate('/')} className="w-full">
               Return to Home
             </Button>
@@ -241,9 +312,9 @@ const OAuthConsentPage = () => {
           </div>
 
           {/* Redirect info */}
-          {redirectUri && (
+          {redirectValidation.url && (
             <p className="text-xs text-center text-muted-foreground">
-              You will be redirected to: <span className="font-mono">{new URL(redirectUri).origin}</span>
+              You will be redirected to: <span className="font-mono">{redirectValidation.url.origin}</span>
             </p>
           )}
         </CardContent>
