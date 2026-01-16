@@ -19,6 +19,24 @@ type ChartContextProps = {
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
+const isSafeCssColor = (value: string) => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+  if (/[<>;]/.test(trimmed)) {
+    return false;
+  }
+
+  if (/url\s*\(|expression\s*\(/i.test(trimmed)) {
+    return false;
+  }
+
+  return true;
+};
+
 function useChart() {
   const context = React.useContext(ChartContext);
 
@@ -75,7 +93,7 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return color && isSafeCssColor(color) ? `  --color-${key}: ${color};` : null;
   })
   .join("\n")}
 }
