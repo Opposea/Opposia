@@ -25,13 +25,13 @@ const Hero = () => {
         </h1>
         
         <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
-          The dating app that celebrates connections and creates perfect chemistry. Find your compatible match and discover love through meaningful relationships.
+          Celebrating differences in life skills turning differences into compatibility.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link to="/quiz">
             <Button variant="magnetic" size="lg" className="text-lg px-8 py-4">
-              Find Your Opposite
+              Take the Quiz
             </Button>
           </Link>
           <Link to="/how-it-works">

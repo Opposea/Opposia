@@ -36,7 +36,7 @@ const HowItWorksPage = () => {
             How It Works
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Discover how we help you find your perfect match through our proven process
+            Discover how we help you find compatibility through our proven process
           </p>
         </div>
       </div>
@@ -68,7 +68,7 @@ const HowItWorksPage = () => {
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Take our compatibility quiz and let us find your perfect opposite
+            Take our compatibility quiz and discover who you're compatible with
           </p>
           <Link to="/quiz">
             <Button variant="magnetic" size="lg">
