@@ -15,19 +15,19 @@ const CTA = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-hero relative overflow-hidden">
-      <div className="container mx-auto px-6 text-center relative z-10">
-        <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+    <section className="py-16 sm:py-20 bg-gradient-hero relative overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
+        <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-white">
           Ready to see who
           <span className="block">you're compatible with?</span>
         </h2>
         
-        <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
           Join thousands of people who've discovered meaningful connections through compatibility.
         </p>
         
-        <div className="max-w-md mx-auto mb-8">
-          <form onSubmit={handleSubmit} className="flex gap-4">
+        <div className="max-w-md mx-auto mb-6 sm:mb-8">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Input
               type="email"
               placeholder="Enter your email"
@@ -36,23 +36,23 @@ const CTA = () => {
               className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20"
               required
             />
-            <Button type="submit" variant="magnetic" className="bg-white/20 hover:bg-white/30">
+            <Button type="submit" variant="magnetic" className="w-full sm:w-auto bg-white/20 hover:bg-white/30">
               Get Started
             </Button>
           </form>
         </div>
         
-        <p className="text-white/70 text-sm mb-8">
+        <p className="text-white/70 text-sm mb-6 sm:mb-8">
           Free to join • No credit card required • Find your match in minutes
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/quiz">
-            <Button variant="magnetic" size="lg" className="bg-white/20 hover:bg-white/30">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+          <Link to="/quiz" className="w-full sm:w-auto">
+            <Button variant="magnetic" size="lg" className="w-full sm:w-auto bg-white/20 hover:bg-white/30">
               Take Compatibility Quiz
             </Button>
           </Link>
-          <Button variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
+          <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/10 border-white/30 text-white hover:bg-white/20">
             Download Our App
           </Button>
         </div>
