@@ -71,12 +71,12 @@ const TermsPage = () => {
                 </div>
               </div>
 
-              {/* Section 3 - What Opposia Is (and Is Not) */}
+              {/* Section 3 - Who we are */}
               <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-xl font-semibold text-foreground mb-4">3. What Opposia Is (and Is Not)</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-4">3. Who we are</h3>
                 <div className="space-y-3 text-muted-foreground">
-                  <p><strong>3.1 Matchmaking platform (no outcome guarantee).</strong> Opposia provides a platform that uses your inputs and activity to suggest potential matches and help users communicate. We do not guarantee that you will receive any matches, that matches will be compatible, or that any interaction will lead to a relationship. We do not provide relationship counselling.</p>
-                  <p><strong>3.2 No routine checks.</strong> We do not conduct routine identity verification, criminal background checks, or sex-offender checks by default. Safety tools, verification badges, moderation, or reports do not change your responsibility to act cautiously.</p>
+                  <p><strong>3.1</strong> Opposia does not have any human input in the matchmaking algorithm, it does not guarantee any matches, advise any matches or make any human judgment when pairing user. The match making algorithm is provided to users for entertainment purposes and shouldn't be used to take real world risks.</p>
+                  <p><strong>3.2</strong> The algorithm is based on users answers to the questionnaire and mistakes could be made by this algorithm.</p>
                 </div>
               </div>
 
@@ -223,8 +223,7 @@ const TermsPage = () => {
                   </ul>
                   <p><strong>11.3 Liability cap (to the extent permitted).</strong> Subject to 11.1, our total liability to you for all claims relating to the Services is limited to the greater of:</p>
                   <ul className="list-disc list-inside ml-4 space-y-1">
-                    <li>£100, or</li>
-                    <li>the amounts you paid us for the Services in the 12 months before the event giving rise to the claim.</li>
+                    <li>100% amounts you paid us for the Services in the 12 months before the event giving rise to the claim.</li>
                   </ul>
                   <p><strong>11.4 User-to-user risk.</strong> You acknowledge that Opposia is not responsible for user conduct and you use the Services at your own risk.</p>
                 </div>
@@ -241,7 +240,6 @@ const TermsPage = () => {
                     <li>Your Content; or</li>
                     <li>your interactions with other users.</li>
                   </ul>
-                  <p><strong>12.2</strong> This does not apply to the extent a claim is caused by Opposia's own breach of law.</p>
                 </div>
               </div>
 
