@@ -33,6 +33,7 @@ import PhotoGallery from '@/components/PhotoGallery';
 import EnlargedProfileView from '@/components/EnlargedProfileView';
 import SwipeableMatchStack from '@/components/SwipeableMatchStack';
 import GiftSender from '@/components/GiftSender';
+import AdminDeletionRequestsPanel from '@/components/AdminDeletionRequestsPanel';
 
 import { VerificationSelfieUpload } from '@/components/VerificationSelfieUpload';
 import { z } from 'zod';
@@ -1562,6 +1563,9 @@ const ProfilePage = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Admin Deletion Requests Panel */}
+              {isAdmin && <AdminDeletionRequestsPanel />}
 
               {/* Prompt to upload verification selfie if not age verified (not for admins) */}
               {!isAdmin && !profile?.age_verified && !profile?.verification_selfie_url && (
