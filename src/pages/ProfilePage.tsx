@@ -603,11 +603,8 @@ const ProfilePage = () => {
       
       // Delete auth user (this will sign them out)
       const { error: deleteAuthError } = await supabase.rpc('delete_user' as any);
-      
       if (deleteAuthError) {
-        // If RPC doesn't exist, try admin API approach
-        const { error } = await supabase.auth.admin.deleteUser(user.id);
-        if (error) throw error;
+        throw deleteAuthError;
       }
 
       toast({

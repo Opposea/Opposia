@@ -4,7 +4,7 @@ import heroImage from "@/assets/hero-dating.jpg";
 import opposiaLogo from "@/assets/opposia-logo-new.png";
 
 const Hero = () => {
-  return <section aria-label="Hero section" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  return <section aria-label="Hero section" className="relative min-h-[85vh] sm:min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24">
       {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
       backgroundImage: `url(${heroImage})`
@@ -13,29 +13,29 @@ const Hero = () => {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         {/* Large Logo */}
-        <img src={opposiaLogo} alt="Opposia" className="w-48 md:w-64 h-auto mx-auto mb-6" />
+        <img src={opposiaLogo} alt="Opposia" className="w-36 sm:w-44 md:w-64 h-auto mx-auto mb-6" />
         
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
           <span className="text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">We Match How You Live</span>
-          <span className="block text-lg md:text-2xl font-medium mt-2 text-white/90 [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
+          <span className="block text-base sm:text-lg md:text-2xl font-medium mt-2 text-white/90 [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
             Because compatibility is practical
           </span>
         </h1>
         
-        <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
-          The dating app that celebrates connections and creates perfect chemistry. Find your compatible match and discover love through meaningful relationships.
+        <p className="text-base sm:text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed [text-shadow:_0_1px_8px_rgb(0_0_0_/_30%)]">
+          Celebrating differences in life skills turning differences into compatibility.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link to="/quiz">
-            <Button variant="magnetic" size="lg" className="text-lg px-8 py-4">
-              Find Your Opposite
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+          <Link to="/quiz" className="w-full sm:w-auto">
+            <Button variant="magnetic" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-8 py-4">
+              Take the Quiz
             </Button>
           </Link>
-          <Link to="/how-it-works">
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20">
+          <Link to="/how-it-works" className="w-full sm:w-auto">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20">
               How It Works
             </Button>
           </Link>

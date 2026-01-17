@@ -9,8 +9,8 @@ const HowItWorks = () => {
     },
     {
       icon: <Target className="w-12 h-12" />,
-      title: "Find Your Opposite",
-      description: "We match you with people who complement your personality, creating that perfect spark of chemistry."
+      title: "Discover Compatibility",
+      description: "We match you with people who complement your personality, creating meaningful connections."
     },
     {
       icon: <Sparkles className="w-12 h-12" />,

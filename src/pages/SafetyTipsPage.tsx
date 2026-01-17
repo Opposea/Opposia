@@ -63,7 +63,7 @@ const SafetyTipsPage = () => {
             Safety First
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Your safety is our priority. Learn how to stay safe while finding your perfect match.
+            Your safety is our priority. Learn how to stay safe while discovering compatibility.
           </p>
         </div>
       </div>

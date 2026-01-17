@@ -314,7 +314,7 @@ const Quiz = () => {
             </CardHeader>
             <CardContent className="text-center space-y-6">
               <p className="text-muted-foreground">
-                Thank you for completing our compatibility quiz! We're analyzing your preferences to find your perfect opposite match.
+                Thank you for completing our compatibility quiz! We're analyzing your preferences to find your compatible match.
               </p>
             </CardContent>
           </Card>
@@ -375,7 +375,7 @@ const Quiz = () => {
               Compatibility Quiz
             </h1>
             <p className="text-muted-foreground">
-              Answer these questions to help us find your perfect opposite match
+              Answer these questions to help us find your compatible match
             </p>
           </div>
 
