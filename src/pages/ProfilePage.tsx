@@ -109,7 +109,7 @@ const profileUpdateSchema = z.object({
 });
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const { isAdmin } = useIsAdmin();
   const [searchParams] = useSearchParams();
@@ -586,38 +586,45 @@ const ProfilePage = () => {
   };
 
   const deleteAccount = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !user?.email) return;
     
     try {
-      // Delete user data in order (due to foreign key constraints)
-      await supabase.from('messages').delete().eq('sender_id', user.id);
-      await supabase.from('matches').delete().or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
-      await supabase.from('blocked_users' as any).delete().eq('user_id', user.id);
-      await supabase.from('blocked_users' as any).delete().eq('blocked_user_id', user.id);
-      await supabase.from('gifts' as any).delete().or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`);
-      await supabase.from('quiz_answers').delete().eq('user_id', user.id);
-      await supabase.from('user_photos').delete().eq('user_id', user.id);
-      await supabase.from('reports' as any).delete().or(`reporter_id.eq.${user.id},reported_user_id.eq.${user.id}`);
-      await supabase.from('video_calls' as any).delete().or(`caller_id.eq.${user.id},receiver_id.eq.${user.id}`);
-      await supabase.from('profiles').delete().eq('user_id', user.id);
-      
-      // Delete auth user (this will sign them out)
-      const { error: deleteAuthError } = await supabase.rpc('delete_user' as any);
-      if (deleteAuthError) {
-        throw deleteAuthError;
+      // Create a deletion request first - this is safer than immediate deletion
+      // The admin can then process this properly
+      const { error: requestError } = await supabase
+        .from('deletion_requests')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          user_name: profile?.name || 'Unknown',
+          status: 'pending'
+        });
+
+      if (requestError) {
+        // If request already exists, inform user
+        if (requestError.code === '23505') {
+          toast({
+            title: "Request Already Submitted",
+            description: "Your deletion request is already being processed.",
+          });
+          return;
+        }
+        throw requestError;
       }
 
       toast({
-        title: "Account Deleted",
-        description: "Your account has been permanently deleted.",
+        title: "Deletion Request Submitted",
+        description: "Your account deletion request has been submitted and will be processed by an admin within 48 hours. You will be signed out now.",
       });
 
-      // Sign out and redirect
+      // Sign out the user
+      await signOut();
       window.location.href = '/';
     } catch (error) {
+      console.error('Deletion request error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete account. Please contact support.",
+        description: "Failed to submit deletion request. Please contact support.",
         variant: "destructive",
       });
     }
