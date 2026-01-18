@@ -178,6 +178,11 @@ const AuthPage = () => {
       return;
     }
 
+    if (isSignUp && !captchaToken) {
+      toast.error('Please complete the captcha before creating an account.');
+      return;
+    }
+
     await processAuth(sanitizedEmail, sanitizedName);
   };
 
@@ -438,14 +443,20 @@ const AuthPage = () => {
               </>
             )}
 
-            <TurnstileWidget
-              siteKey={TURNSTILE_SITE_KEY}
-              onVerify={handleCaptchaVerify}
-              onExpire={handleCaptchaExpire}
-              onError={handleCaptchaError}
-            />
+            {isSignUp && (
+              <TurnstileWidget
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
+                onError={handleCaptchaError}
+              />
+            )}
             
-            <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0 || !captchaToken}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || verifyingLocation || lockoutSeconds > 0 || (isSignUp && !captchaToken)}
+            >
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
@@ -476,6 +487,7 @@ const AuthPage = () => {
                   setDateOfBirth('');
                   setCountry('');
                   setTermsAccepted(false);
+                  setCaptchaToken(undefined);
                 }}
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
