@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,9 @@ import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
+import TurnstileWidget from '@/components/TurnstileWidget';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAACNSbE7cWdnQ7ZJk';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -30,6 +33,20 @@ const AuthPage = () => {
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
   const { isLocked, getRemainingLockoutTime, recordFailedAttempt, resetOnSuccess, getAttemptsRemaining } = useAuthRateLimit();
+
+  // Turnstile captcha callbacks
+  const handleCaptchaVerify = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken(undefined);
+  }, []);
+
+  const handleCaptchaError = useCallback(() => {
+    setCaptchaToken(undefined);
+    toast.error('Captcha failed to load. Please refresh the page.');
+  }, []);
 
   // Check lockout status and update countdown
   useEffect(() => {
@@ -420,8 +437,15 @@ const AuthPage = () => {
                 </div>
               </>
             )}
+
+            <TurnstileWidget
+              siteKey={TURNSTILE_SITE_KEY}
+              onVerify={handleCaptchaVerify}
+              onExpire={handleCaptchaExpire}
+              onError={handleCaptchaError}
+            />
             
-            <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
+            <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0 || !captchaToken}>
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
