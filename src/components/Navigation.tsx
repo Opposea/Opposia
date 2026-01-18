@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, User, LogOut } from 'lucide-react';
+import { Heart, User, LogOut, Menu } from 'lucide-react';
 import opposiaLogo from '@/assets/opposia-logo-new.png';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 const Navigation = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const {
     user,
     signOut
@@ -27,6 +30,45 @@ const Navigation = () => {
         </Link>
 
         <div className="flex items-center space-x-4">
+          {/* Mobile hamburger menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 bg-gradient-to-b from-primary to-secondary border-r-0">
+              <SheetHeader>
+                <SheetTitle className="text-white text-left">Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col space-y-4 mt-6">
+                <Link 
+                  to="/about" 
+                  className="text-white/90 hover:text-white text-lg font-medium transition-colors py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/blog" 
+                  className="text-white/90 hover:text-white text-lg font-medium transition-colors py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+                <Link 
+                  to="/how-it-works" 
+                  className="text-white/90 hover:text-white text-lg font-medium transition-colors py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  How It Works
+                </Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
+
+          {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-4 mr-4">
             <Link to="/about" className="text-white/90 hover:text-white text-sm font-medium transition-colors">About</Link>
             <Link to="/blog" className="text-white/90 hover:text-white text-sm font-medium transition-colors">Blog</Link>
