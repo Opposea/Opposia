@@ -30,7 +30,7 @@ const UnsubscribePage = () => {
       try {
         // Check if already unsubscribed
         const { data: existing } = await supabase
-          .from('email_unsubscribes')
+          .from('email_unsubscribes' as any)
           .select('id')
           .eq('email', email.toLowerCase())
           .maybeSingle();
@@ -43,12 +43,12 @@ const UnsubscribePage = () => {
 
         // Insert unsubscribe record
         const { error } = await supabase
-          .from('email_unsubscribes')
+          .from('email_unsubscribes' as any)
           .insert({
             email: email.toLowerCase(),
             unsubscribe_token: token,
             unsubscribed_at: new Date().toISOString()
-          });
+          } as any);
 
         if (error) {
           console.error('Unsubscribe error:', error);

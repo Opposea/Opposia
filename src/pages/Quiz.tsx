@@ -232,10 +232,17 @@ const Quiz = () => {
       const gender = data.gender;
       const lookingFor = data.looking_for;
       
+      // Map quiz values to database values for compatibility matching
+      const genderMapping: Record<string, string> = {
+        'man': 'male',
+        'woman': 'female'
+      };
+      const dbGender = genderMapping[gender] || gender;
+      
       // Derive sexual orientation from gender + looking_for
       let sexualOrientation: string;
       if (lookingFor === 'both') {
-        sexualOrientation = 'bisexual';
+        sexualOrientation = 'bi';
       } else if (gender === 'man' && lookingFor === 'man') {
         sexualOrientation = 'gay';
       } else if (gender === 'woman' && lookingFor === 'woman') {
@@ -248,7 +255,7 @@ const Quiz = () => {
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
-          gender,
+          gender: dbGender,
           looking_for: lookingFor,
           sexual_orientation: sexualOrientation,
         })
