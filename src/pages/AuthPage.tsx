@@ -180,10 +180,46 @@ const [isSignUp, setIsSignUp] = useState(false);
     await processAuth(sanitizedEmail, sanitizedName);
   };
 
+  const verifyTurnstile = async (token: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-turnstile', {
+        body: { token }
+      });
+
+      if (error) {
+        console.error('Turnstile verification error:', error);
+        return { success: false, message: 'Captcha verification failed. Please try again.' };
+      }
+
+      return { 
+        success: data.success, 
+        message: data.message 
+      };
+    } catch (err) {
+      console.error('Turnstile verification failed:', err);
+      return { success: false, message: 'Captcha verification failed. Please try again.' };
+    }
+  };
+
   const processAuth = async (sanitizedEmail: string, sanitizedName: string) => {
     setLoading(true);
 
     try {
+      // Verify captcha first
+      if (!captchaToken) {
+        toast.error('Please complete the captcha');
+        setLoading(false);
+        return;
+      }
+
+      const captchaResult = await verifyTurnstile(captchaToken);
+      if (!captchaResult.success) {
+        toast.error(captchaResult.message);
+        setCaptchaToken(undefined);
+        setLoading(false);
+        return;
+      }
+
       let result;
       if (isSignUp) {
         // Verify location before signup
