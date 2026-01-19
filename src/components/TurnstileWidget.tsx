@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface TurnstileWidgetProps {
   siteKey: string;
@@ -27,58 +27,120 @@ declare global {
 const TurnstileWidget = ({ siteKey, onVerify, onExpire, onError }: TurnstileWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const scriptLoadedRef = useRef(false);
-
-  const renderWidget = useCallback(() => {
-    if (!containerRef.current || !window.turnstile || widgetIdRef.current) return;
-
-    widgetIdRef.current = window.turnstile.render(containerRef.current, {
-      sitekey: siteKey,
-      callback: onVerify,
-      'expired-callback': onExpire,
-      'error-callback': onError,
-      theme: 'auto',
-    });
-  }, [siteKey, onVerify, onExpire, onError]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if script already exists
-    const existingScript = document.querySelector('script[src*="turnstile"]');
-    
-    if (existingScript && window.turnstile) {
-      renderWidget();
-      return;
-    }
+    let isMounted = true;
 
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback';
-      script.async = true;
-      script.defer = true;
-      
-      window.onloadTurnstileCallback = () => {
-        scriptLoadedRef.current = true;
+    const renderWidget = () => {
+      if (!containerRef.current || !window.turnstile || widgetIdRef.current) return;
+
+      try {
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: siteKey,
+          callback: (token: string) => {
+            if (isMounted) {
+              onVerify(token);
+            }
+          },
+          'expired-callback': () => {
+            if (isMounted && onExpire) {
+              onExpire();
+            }
+          },
+          'error-callback': () => {
+            if (isMounted && onError) {
+              onError();
+            }
+          },
+          theme: 'auto',
+        });
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to render Turnstile widget:', err);
+        if (isMounted && onError) {
+          onError();
+        }
+      }
+    };
+
+    const loadScript = () => {
+      // If turnstile is already available, render immediately
+      if (window.turnstile) {
         renderWidget();
+        return;
+      }
+
+      // Check if script already exists
+      const existingScript = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
+      
+      if (existingScript) {
+        // Script exists, wait for it to load
+        const checkInterval = setInterval(() => {
+          if (window.turnstile) {
+            clearInterval(checkInterval);
+            renderWidget();
+          }
+        }, 100);
+
+        // Clear interval after 10 seconds to prevent memory leak
+        setTimeout(() => clearInterval(checkInterval), 10000);
+        return;
+      }
+
+      // Create and load the script
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      
+      script.onload = () => {
+        // Wait a bit for turnstile to initialize
+        const checkInterval = setInterval(() => {
+          if (window.turnstile) {
+            clearInterval(checkInterval);
+            renderWidget();
+          }
+        }, 50);
+
+        setTimeout(() => clearInterval(checkInterval), 5000);
+      };
+
+      script.onerror = () => {
+        console.error('Failed to load Turnstile script');
+        if (isMounted) {
+          setIsLoading(false);
+          if (onError) onError();
+        }
       };
 
       document.head.appendChild(script);
-    } else if (!scriptLoadedRef.current) {
-      // Script exists but not yet loaded, set up callback
-      window.onloadTurnstileCallback = () => {
-        scriptLoadedRef.current = true;
-        renderWidget();
-      };
-    }
+    };
+
+    loadScript();
 
     return () => {
+      isMounted = false;
       if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch (err) {
+          // Ignore errors during cleanup
+        }
         widgetIdRef.current = null;
       }
     };
-  }, [renderWidget]);
+  }, [siteKey, onVerify, onExpire, onError]);
 
-  return <div ref={containerRef} className="flex justify-center my-4" />;
+  return (
+    <div className="flex justify-center my-4">
+      <div ref={containerRef} />
+      {isLoading && (
+        <div className="text-sm text-muted-foreground">Loading security check...</div>
+      )}
+    </div>
+  );
 };
 
 export default TurnstileWidget;
