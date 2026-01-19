@@ -9,6 +9,7 @@ import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
 import AdminVerificationPanel from './AdminVerificationPanel';
 import { cn } from '@/lib/utils';
+import { generateBadgesFromQuizAnswers, getBadgeColorClass, QuizBadge, QuizAnswer } from '@/lib/quizBadges';
 
 interface Photo {
   id: string;
@@ -63,6 +64,7 @@ const EnlargedProfileView: React.FC<EnlargedProfileViewProps> = ({
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [localProfile, setLocalProfile] = useState<Profile | null>(profile);
   const [justVerified, setJustVerified] = useState(false);
+  const [quizBadges, setQuizBadges] = useState<QuizBadge[]>([]);
 
   useEffect(() => {
     setLocalProfile(profile);
@@ -72,8 +74,29 @@ const EnlargedProfileView: React.FC<EnlargedProfileViewProps> = ({
   useEffect(() => {
     if (profile?.user_id) {
       fetchPhotos();
+      fetchQuizBadges();
     }
   }, [profile?.user_id]);
+
+  const fetchQuizBadges = async () => {
+    if (!profile?.user_id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('quiz_answers')
+        .select('question_id, answer')
+        .eq('user_id', profile.user_id);
+
+      if (error) throw error;
+      
+      if (data) {
+        const badges = generateBadgesFromQuizAnswers(data as QuizAnswer[], 5);
+        setQuizBadges(badges);
+      }
+    } catch (error) {
+      console.error('Error fetching quiz badges:', error);
+    }
+  };
 
   const handleVerificationChange = async () => {
     // Mark as verified immediately
@@ -258,6 +281,25 @@ const EnlargedProfileView: React.FC<EnlargedProfileViewProps> = ({
                   {localProfile.interests.map((interest, index) => (
                     <Badge key={index} variant="secondary">
                       {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quiz-based personality badges */}
+            {quizBadges.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Personality</h3>
+                <div className="flex flex-wrap gap-2">
+                  {quizBadges.map((badge, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline"
+                      className={cn("text-sm", getBadgeColorClass(badge.color))}
+                    >
+                      <span className="mr-1">{badge.emoji}</span>
+                      {badge.label}
                     </Badge>
                   ))}
                 </div>
