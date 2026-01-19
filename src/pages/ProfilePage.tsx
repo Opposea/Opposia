@@ -427,25 +427,22 @@ const ProfilePage = () => {
       // Calculate comprehensive compatibility scores for each potential match
       const matchesWithScores = await Promise.all(
         filteredProfiles.map(async (otherProfile) => {
-          let quizScore = 0;
-          let hasQuizData = false;
+          let totalScore = 0;
           
           // 1. Quiz-based compatibility (40% weight)
           try {
-            const { data } = await supabase
+            const { data: quizScore } = await supabase
               .rpc('calculate_compatibility_score', {
                 user1_id: user.id,
                 user2_id: otherProfile.user_id
               });
-            quizScore = data || 0;
-            // If score > 0, we have real quiz data
-            hasQuizData = quizScore > 0;
+            totalScore += (quizScore || 0) * 0.4;
           } catch {
             // Silent fail
           }
           
           // 2. Age compatibility (30% weight)
-          let ageScore = 50; // Default baseline when age is missing
+          let ageScore = 0;
           if (profile?.age && otherProfile.age) {
             const ageDifference = Math.abs(profile.age - otherProfile.age);
             if (ageDifference <= 5) ageScore = 100;
@@ -453,9 +450,10 @@ const ProfilePage = () => {
             else if (ageDifference <= 15) ageScore = 40;
             else ageScore = 20;
           }
+          totalScore += (ageScore * 0.3);
           
           // 3. Location compatibility (30% weight)
-          let locationScore = 50; // Default baseline when location is missing
+          let locationScore = 0;
           if (profile?.location && otherProfile.location) {
             const loc1 = profile.location.toLowerCase().trim();
             const loc2 = otherProfile.location.toLowerCase().trim();
@@ -465,16 +463,7 @@ const ProfilePage = () => {
             else if (loc1.includes(loc2.split(',')[0]) || loc2.includes(loc1.split(',')[0])) locationScore = 50;
             else locationScore = 20;
           }
-          
-          let totalScore: number;
-          if (hasQuizData) {
-            // Normal weighted calculation when quiz data exists
-            totalScore = (quizScore * 0.4) + (ageScore * 0.3) + (locationScore * 0.3);
-          } else {
-            // No quiz data: use age/location only but ensure minimum 50% baseline
-            const baseScore = (ageScore * 0.5) + (locationScore * 0.5);
-            totalScore = Math.max(50, baseScore); // Minimum 50% when no quiz data
-          }
+          totalScore += (locationScore * 0.3);
           
           return {
             ...otherProfile,
