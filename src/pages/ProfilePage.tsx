@@ -142,6 +142,21 @@ const ProfilePage = () => {
   const [blockedUsersProfiles, setBlockedUsersProfiles] = useState<BlockedUserProfile[]>([]);
   const [selectedMatchForGift, setSelectedMatchForGift] = useState<Match | null>(null);
   const [showOnlyUnverified, setShowOnlyUnverified] = useState(false);
+  const [discoverDebug, setDiscoverDebug] = useState<{
+    lastRun: string | null;
+    rpcCount: number | null;
+    rpcError: string | null;
+    otherProfilesCount: number | null;
+    blockedCount: number | null;
+    connectedCount: number | null;
+  }>({
+    lastRun: null,
+    rpcCount: null,
+    rpcError: null,
+    otherProfilesCount: null,
+    blockedCount: null,
+    connectedCount: null,
+  });
 
   const fetchQuizAnswers = async () => {
     if (!user?.id) return;
@@ -273,118 +288,146 @@ const ProfilePage = () => {
 
   const fetchPotentialMatches = async () => {
     if (!user?.id) return;
+
+    setDiscoverDebug(prev => ({
+      ...prev,
+      lastRun: new Date().toISOString(),
+      rpcError: null,
+      rpcCount: null,
+      blockedCount: null,
+      connectedCount: null,
+    }));
     
     try {
-      // Use the get_discoverable_profiles RPC which includes gender/orientation compatibility
-      const { data: profiles, error } = await supabase
-        .rpc('get_discoverable_profiles');
+      // Use the get_discoverable_profiles RPC which includes compatibility filtering
+      const { data: profiles, error } = await supabase.rpc('get_discoverable_profiles');
 
       if (error) throw error;
 
-      if (profiles) {
-        // Get users that the current user has blocked
-        const { data: currentBlockedData } = await supabase
-          .from('blocked_users' as any)
-          .select('blocked_user_id')
-          .eq('user_id', user.id);
-        
-        const currentBlockedIds = (currentBlockedData as any)?.map((b: any) => b.blocked_user_id) || [];
+      setDiscoverDebug(prev => ({
+        ...prev,
+        rpcCount: Array.isArray(profiles) ? profiles.length : 0,
+      }));
 
-        // Get users who have blocked the current user (bidirectional check)
-        const { data: blockedByData } = await supabase
-          .from('blocked_users' as any)
-          .select('user_id')
-          .eq('blocked_user_id', user.id);
-        
-        const blockedByIds = (blockedByData as any)?.map((b: any) => b.user_id) || [];
+      // Helpful sanity check for admins: how many other profile rows exist at all?
+      if (isAdmin) {
+        const { count } = await supabase
+          .from('profiles')
+          .select('user_id', { count: 'exact', head: true })
+          .neq('user_id', user.id);
 
-        // Combine both blocked lists
-        const allBlockedIds = [...new Set([...currentBlockedIds, ...blockedByIds])];
-
-        // Get all existing matches/requests
-        const { data: existingMatches } = await supabase
-          .from('matches')
-          .select('user1_id, user2_id')
-          .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
-
-        const connectedUserIds = new Set(
-          existingMatches?.map(m => 
-            m.user1_id === user.id ? m.user2_id : m.user1_id
-          ) || []
-        );
-        
-        // Filter out blocked users and users with existing match/request
-        const filteredProfiles = profiles.filter(p => {
-          const isBlocked = allBlockedIds.includes(p.user_id);
-          const isConnected = connectedUserIds.has(p.user_id);
-          return !isBlocked && !isConnected;
-        });
-        
-        // Calculate comprehensive compatibility scores for each potential match
-        const matchesWithScores = await Promise.all(
-          filteredProfiles.map(async (otherProfile) => {
-            let totalScore = 0;
-            
-            // 1. Quiz-based compatibility (40% weight)
-            try {
-              const { data: quizScore } = await supabase
-                .rpc('calculate_compatibility_score', {
-                  user1_id: user.id,
-                  user2_id: otherProfile.user_id
-                });
-              totalScore += (quizScore || 0) * 0.4;
-            } catch (error) {
-              // Error calculating compatibility - continue with other scores
-            }
-            
-            // 2. Age compatibility (30% weight)
-            let ageScore = 0;
-            if (profile?.age && otherProfile.age) {
-              const ageDifference = Math.abs(profile.age - otherProfile.age);
-              if (ageDifference <= 5) {
-                ageScore = 100;
-              } else if (ageDifference <= 10) {
-                ageScore = 70;
-              } else if (ageDifference <= 15) {
-                ageScore = 40;
-              } else {
-                ageScore = 20;
-              }
-            }
-            totalScore += (ageScore * 0.3);
-            
-            // 3. Location compatibility (30% weight)
-            let locationScore = 0;
-            if (profile?.location && otherProfile.location) {
-              const loc1 = profile.location.toLowerCase().trim();
-              const loc2 = otherProfile.location.toLowerCase().trim();
-              
-              if (loc1 === loc2) {
-                locationScore = 100;
-              } else if (loc1.split(',')[0] === loc2.split(',')[0]) {
-                locationScore = 70;
-              } else if (loc1.includes(loc2.split(',')[0]) || 
-                       loc2.includes(loc1.split(',')[0])) {
-                locationScore = 50;
-              } else {
-                locationScore = 20;
-              }
-            }
-            totalScore += (locationScore * 0.3);
-            
-            return {
-              ...otherProfile,
-              compatibility_score: Math.round(totalScore)
-            };
-          })
-        );
-
-        // Sort by comprehensive compatibility score (highest first)
-        matchesWithScores.sort((a, b) => b.compatibility_score - a.compatibility_score);
-        setPotentialMatches(matchesWithScores);
+        setDiscoverDebug(prev => ({
+          ...prev,
+          otherProfilesCount: count ?? 0,
+        }));
       }
-    } catch (error) {
-      // Error fetching potential matches - silent fail
+
+      if (!profiles) {
+        setPotentialMatches([]);
+        return;
+      }
+
+      // Get users that the current user has blocked
+      const { data: currentBlockedData } = await supabase
+        .from('blocked_users' as any)
+        .select('blocked_user_id')
+        .eq('user_id', user.id);
+      
+      const currentBlockedIds = (currentBlockedData as any)?.map((b: any) => b.blocked_user_id) || [];
+
+      // Get users who have blocked the current user (bidirectional check)
+      const { data: blockedByData } = await supabase
+        .from('blocked_users' as any)
+        .select('user_id')
+        .eq('blocked_user_id', user.id);
+      
+      const blockedByIds = (blockedByData as any)?.map((b: any) => b.user_id) || [];
+
+      // Combine both blocked lists
+      const allBlockedIds = [...new Set([...currentBlockedIds, ...blockedByIds])];
+
+      // Get all existing matches/requests
+      const { data: existingMatches } = await supabase
+        .from('matches')
+        .select('user1_id, user2_id')
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+      const connectedUserIds = new Set(
+        existingMatches?.map(m => 
+          m.user1_id === user.id ? m.user2_id : m.user1_id
+        ) || []
+      );
+
+      setDiscoverDebug(prev => ({
+        ...prev,
+        blockedCount: allBlockedIds.length,
+        connectedCount: connectedUserIds.size,
+      }));
+      
+      // Filter out blocked users and users with existing match/request
+      const filteredProfiles = profiles.filter(p => {
+        const isBlocked = allBlockedIds.includes(p.user_id);
+        const isConnected = connectedUserIds.has(p.user_id);
+        return !isBlocked && !isConnected;
+      });
+      
+      // Calculate comprehensive compatibility scores for each potential match
+      const matchesWithScores = await Promise.all(
+        filteredProfiles.map(async (otherProfile) => {
+          let totalScore = 0;
+          
+          // 1. Quiz-based compatibility (40% weight)
+          try {
+            const { data: quizScore } = await supabase
+              .rpc('calculate_compatibility_score', {
+                user1_id: user.id,
+                user2_id: otherProfile.user_id
+              });
+            totalScore += (quizScore || 0) * 0.4;
+          } catch {
+            // Silent fail
+          }
+          
+          // 2. Age compatibility (30% weight)
+          let ageScore = 0;
+          if (profile?.age && otherProfile.age) {
+            const ageDifference = Math.abs(profile.age - otherProfile.age);
+            if (ageDifference <= 5) ageScore = 100;
+            else if (ageDifference <= 10) ageScore = 70;
+            else if (ageDifference <= 15) ageScore = 40;
+            else ageScore = 20;
+          }
+          totalScore += (ageScore * 0.3);
+          
+          // 3. Location compatibility (30% weight)
+          let locationScore = 0;
+          if (profile?.location && otherProfile.location) {
+            const loc1 = profile.location.toLowerCase().trim();
+            const loc2 = otherProfile.location.toLowerCase().trim();
+            
+            if (loc1 === loc2) locationScore = 100;
+            else if (loc1.split(',')[0] === loc2.split(',')[0]) locationScore = 70;
+            else if (loc1.includes(loc2.split(',')[0]) || loc2.includes(loc1.split(',')[0])) locationScore = 50;
+            else locationScore = 20;
+          }
+          totalScore += (locationScore * 0.3);
+          
+          return {
+            ...otherProfile,
+            compatibility_score: Math.round(totalScore)
+          };
+        })
+      );
+
+      // Sort by comprehensive compatibility score (highest first)
+      matchesWithScores.sort((a, b) => b.compatibility_score - a.compatibility_score);
+      setPotentialMatches(matchesWithScores);
+    } catch (error: any) {
+      setDiscoverDebug(prev => ({
+        ...prev,
+        rpcError: error?.message || 'Unknown error',
+      }));
+      setPotentialMatches([]);
     } finally {
       setLoading(false);
     }
@@ -1661,6 +1704,40 @@ const ProfilePage = () => {
                               ? 'All users have been age verified!'
                               : 'Check back later as new users join, or retake the quiz to update your preferences.'}
                           </p>
+
+                          {isAdmin && (
+                            <div className="mt-4 text-left text-xs text-muted-foreground bg-muted/30 rounded-lg p-4 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-medium text-foreground/80">Discover debug</p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => fetchPotentialMatches()}
+                                  className="h-8"
+                                >
+                                  Retry fetch
+                                </Button>
+                              </div>
+                              <p>
+                                <span className="font-medium">RPC get_discoverable_profiles:</span>{' '}
+                                {discoverDebug.rpcCount === null ? '—' : discoverDebug.rpcCount} result(s)
+                                {discoverDebug.rpcError ? ` • ${discoverDebug.rpcError}` : ''}
+                              </p>
+                              <p>
+                                <span className="font-medium">Other profiles in DB (excluding you):</span>{' '}
+                                {discoverDebug.otherProfilesCount === null ? '—' : discoverDebug.otherProfilesCount}
+                              </p>
+                              <p>
+                                <span className="font-medium">Filtered (blocked / connected):</span>{' '}
+                                {discoverDebug.blockedCount === null ? '—' : discoverDebug.blockedCount} /{' '}
+                                {discoverDebug.connectedCount === null ? '—' : discoverDebug.connectedCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                If “Other profiles” is 0, the issue is your database has no profile rows for other users (not a frontend bug).
+                              </p>
+                            </div>
+                          )}
+
                           {!showOnlyUnverified && (
                             <Button variant="gradient" size="lg" onClick={() => setActiveTab('quiz')}>
                               <RefreshCw className="w-4 h-4 mr-2" />
