@@ -28,6 +28,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const ensureProfileExists = async (u: User) => {
+    try {
+      const nameFromMeta = (u.user_metadata as any)?.name as string | undefined;
+      const fallbackName = u.email?.split('@')[0] || 'User';
+
+      await supabase
+        .from('profiles')
+        .upsert(
+          {
+            user_id: u.id,
+            name: (nameFromMeta || fallbackName).trim().slice(0, 100),
+            country: (u.user_metadata as any)?.country ?? null,
+            date_of_birth: (u.user_metadata as any)?.date_of_birth ?? null,
+          } as any,
+          { onConflict: 'user_id' }
+        );
+    } catch {
+      // Silent fail: profile creation should never block login UX
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -35,6 +56,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        if (session?.user) {
+          void ensureProfileExists(session.user);
+        }
       }
     );
 
@@ -43,6 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (session?.user) {
+        void ensureProfileExists(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
