@@ -1613,8 +1613,8 @@ const ProfilePage = () => {
                 </Card>
               )}
 
-              {/* Prompt to complete quiz if gender/looking_for missing */}
-              {(!profile?.gender || !profile?.looking_for) && (
+              {/* Prompt to complete quiz if gender + preference missing */}
+              {(!profile?.gender || (!profile?.looking_for && !profile?.sexual_orientation)) && (
                 <Card className="shadow-soft border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardContent className="text-center py-12">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
@@ -1635,8 +1635,8 @@ const ProfilePage = () => {
                 </Card>
               )}
               
-              {/* Show matches if user has completed quiz (has gender and looking_for) */}
-              {profile?.gender && profile?.looking_for && (
+              {/* Show matches if user has completed quiz (has gender + preference) */}
+              {profile?.gender && (profile?.looking_for || profile?.sexual_orientation) && (
                 <>
                   {(() => {
                     const displayedMatches = showOnlyUnverified && isAdmin
