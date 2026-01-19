@@ -16,26 +16,19 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 const quizQuestions = [
   {
     id: "gender",
-    question: "How do you describe your gender?",
+    question: "Are you a man or a woman?",
     options: [
       { value: "man", label: "Man" },
-      { value: "woman", label: "Woman" },
-      { value: "non-binary", label: "Non-binary" },
-      { value: "trans-man", label: "Trans man" },
-      { value: "trans-woman", label: "Trans woman" },
-      { value: "prefer-not-to-say", label: "Prefer not to say" }
+      { value: "woman", label: "Woman" }
     ]
   },
   {
-    id: "sexual_orientation",
-    question: "Which best describes your sexual orientation?",
+    id: "looking_for",
+    question: "Are you looking for a man or a woman?",
     options: [
-      { value: "straight", label: "Straight" },
-      { value: "gay", label: "Gay" },
-      { value: "lesbian", label: "Lesbian" },
-      { value: "bisexual", label: "Bisexual" },
-      { value: "pansexual", label: "Pansexual" },
-      { value: "prefer-not-to-say", label: "Prefer not to say" }
+      { value: "man", label: "A man" },
+      { value: "woman", label: "A woman" },
+      { value: "both", label: "Both" }
     ]
   },
   {
@@ -235,15 +228,28 @@ const Quiz = () => {
     setIsSubmitting(true);
     
     try {
-      // Extract gender and sexual_orientation to update profile
+      // Extract gender and looking_for to update profile
       const gender = data.gender;
-      const sexualOrientation = data.sexual_orientation;
+      const lookingFor = data.looking_for;
+      
+      // Derive sexual orientation from gender + looking_for
+      let sexualOrientation: string;
+      if (lookingFor === 'both') {
+        sexualOrientation = 'bisexual';
+      } else if (gender === 'man' && lookingFor === 'man') {
+        sexualOrientation = 'gay';
+      } else if (gender === 'woman' && lookingFor === 'woman') {
+        sexualOrientation = 'lesbian';
+      } else {
+        sexualOrientation = 'straight';
+      }
 
-      // Update profile with gender and sexual orientation
+      // Update profile with gender, looking_for, and derived sexual orientation
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
           gender,
+          looking_for: lookingFor,
           sexual_orientation: sexualOrientation,
         })
         .eq("user_id", user.id);

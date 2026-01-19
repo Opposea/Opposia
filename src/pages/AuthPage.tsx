@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,12 @@ import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
+import TurnstileWidget from '@/components/TurnstileWidget';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAACNSbE7cWdnQ7ZJk';
 
 const AuthPage = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -22,10 +25,37 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifyingLocation, setVerifyingLocation] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string>();
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const isNonProdHost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('lovable.app') ||
+    window.location.hostname.endsWith('lovableproject.com')
+  );
+
+  // Enforce captcha only on real domains (Turnstile keys must be configured per-domain)
+  const isCaptchaRequired = !isNonProdHost;
+
+  const handleCaptchaVerify = useCallback((token: string) => {
+    setCaptchaToken(token);
+    setCaptchaError(false);
+  }, []);
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken(undefined);
+  }, []);
+
+  const handleCaptchaError = useCallback(() => {
+    setCaptchaToken(undefined);
+    setCaptchaError(true);
+    // Don't block user - allow sign-in but log the error
+    console.error('Captcha failed to load - allowing sign-in without captcha');
+  }, []);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -164,10 +194,55 @@ const AuthPage = () => {
     await processAuth(sanitizedEmail, sanitizedName);
   };
 
+  const verifyTurnstile = async (token: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-turnstile', {
+        body: { token }
+      });
+
+      if (error) {
+        console.error('Turnstile verification error:', error);
+        return { success: false, message: 'Captcha verification failed. Please try again.' };
+      }
+
+      return { 
+        success: data.success, 
+        message: data.message 
+      };
+    } catch (err) {
+      console.error('Turnstile verification failed:', err);
+      return { success: false, message: 'Captcha verification failed. Please try again.' };
+    }
+  };
+
   const processAuth = async (sanitizedEmail: string, sanitizedName: string) => {
     setLoading(true);
 
     try {
+      // Captcha enforcement:
+      // - On preview domains, allow auth even if Turnstile can't load (common during setup)
+      // - On real domains, require a token and verify server-side
+      if (isCaptchaRequired) {
+        if (!captchaToken) {
+          toast.error('Please complete the captcha');
+          setLoading(false);
+          return;
+        }
+
+        const captchaResult = await verifyTurnstile(captchaToken);
+        if (!captchaResult.success) {
+          toast.error(captchaResult.message);
+          setCaptchaToken(undefined);
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Preview: if Turnstile errors, don't block sign-in/sign-up
+        if (captchaError) {
+          console.warn('Turnstile unavailable on preview host; bypassing captcha.');
+        }
+      }
+
       let result;
       if (isSignUp) {
         // Verify location before signup
@@ -181,14 +256,14 @@ const AuthPage = () => {
           return;
         }
 
-        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country, captchaToken);
+        result = await signUp(sanitizedEmail, password, sanitizedName, dateOfBirth, country);
         if (!result.error) {
           resetOnSuccess();
           const ukMessage = country === 'GB' ? ' For UK members, your age will be manually verified before you can access all features.' : '';
           toast.success(`Account created! Please check your email to verify your account before signing in.${ukMessage}`);
         }
       } else {
-        result = await signIn(sanitizedEmail, password, captchaToken);
+        result = await signIn(sanitizedEmail, password);
         if (!result.error) {
           resetOnSuccess();
           toast.success('Welcome back!');
@@ -231,8 +306,6 @@ const AuthPage = () => {
           toast.error('Invalid email or password. Please try again.');
         } else if (result.error.message.includes('Email not confirmed')) {
           toast.error('Please verify your email before signing in. Check your inbox for the confirmation link.');
-        } else if (result.error.message.includes('captcha')) {
-          toast.error('Captcha verification failed. Please try again.');
         } else {
           toast.error(result.error.message || 'An error occurred. Please try again.');
         }
@@ -420,8 +493,24 @@ const AuthPage = () => {
                 </div>
               </>
             )}
-            
-            <Button type="submit" className="w-full" disabled={loading || verifyingLocation || lockoutSeconds > 0}>
+
+            <TurnstileWidget
+              siteKey={TURNSTILE_SITE_KEY}
+              onVerify={handleCaptchaVerify}
+              onExpire={handleCaptchaExpire}
+              onError={handleCaptchaError}
+            />
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                loading ||
+                verifyingLocation ||
+                lockoutSeconds > 0 ||
+                (isCaptchaRequired && !captchaToken)
+              }
+            >
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
