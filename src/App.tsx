@@ -13,6 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import ProfilePage from "./pages/ProfilePage";
+import UnsubscribePage from "./pages/UnsubscribePage";
 
 import SafetyTipsPage from "./pages/SafetyTipsPage";
 import SafetyModerationPolicyPage from "./pages/SafetyModerationPolicyPage";
@@ -66,7 +67,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/cookie-settings" element={<CookieSettingsPage />} />
             <Route path="/oauth/consent" element={<OAuthConsentPage />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieBanner />
