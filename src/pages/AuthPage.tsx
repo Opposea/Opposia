@@ -38,8 +38,10 @@ const [isSignUp, setIsSignUp] = useState(false);
     window.location.hostname.endsWith('lovableproject.com')
   );
 
-  // Enforce captcha only on real domains (Turnstile keys must be configured per-domain)
-  const isCaptchaRequired = !isNonProdHost;
+  // Captcha is only enforced on production domains, and only for sign-up.
+  // (Preview domains often aren't allowlisted in Turnstile, which would block auth.)
+  const shouldShowCaptcha = !isNonProdHost && isSignUp;
+  const isCaptchaRequired = shouldShowCaptcha;
 
   const handleCaptchaVerify = useCallback((token: string) => {
     setCaptchaToken(token);
@@ -494,12 +496,14 @@ const [isSignUp, setIsSignUp] = useState(false);
               </>
             )}
 
-            <TurnstileWidget
-              siteKey={TURNSTILE_SITE_KEY}
-              onVerify={handleCaptchaVerify}
-              onExpire={handleCaptchaExpire}
-              onError={handleCaptchaError}
-            />
+            {shouldShowCaptcha ? (
+              <TurnstileWidget
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
+                onError={handleCaptchaError}
+              />
+            ) : null}
 
             <Button
               type="submit"
@@ -541,6 +545,8 @@ const [isSignUp, setIsSignUp] = useState(false);
                   setDateOfBirth('');
                   setCountry('');
                   setTermsAccepted(false);
+                  setCaptchaToken(undefined);
+                  setCaptchaError(false);
                 }}
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
