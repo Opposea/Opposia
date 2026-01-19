@@ -115,6 +115,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const { isAdmin } = useIsAdmin();
   const [searchParams] = useSearchParams();
+  const isDebug = searchParams.get('debug') === '1';
   const [profile, setProfile] = useState<Profile | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -309,8 +310,8 @@ const ProfilePage = () => {
         rpcCount: Array.isArray(profiles) ? profiles.length : 0,
       }));
 
-      // Helpful sanity check for admins: how many other profile rows exist at all?
-      if (isAdmin) {
+      // Helpful sanity check in debug/admin mode: how many other profile rows exist at all?
+      if (isAdmin || isDebug) {
         const { count } = await supabase
           .from('profiles')
           .select('user_id', { count: 'exact', head: true })
@@ -1705,7 +1706,7 @@ const ProfilePage = () => {
                               : 'Check back later as new users join, or retake the quiz to update your preferences.'}
                           </p>
 
-                          {isAdmin && (
+                          {(isAdmin || isDebug) && (
                             <div className="mt-4 text-left text-xs text-muted-foreground bg-muted/30 rounded-lg p-4 space-y-2">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="font-medium text-foreground/80">Discover debug</p>
@@ -1718,6 +1719,12 @@ const ProfilePage = () => {
                                   Retry fetch
                                 </Button>
                               </div>
+
+                              <p>
+                                <span className="font-medium">You:</span>{' '}
+                                gender={profile?.gender ?? 'null'}, looking_for={profile?.looking_for ?? 'null'}, sexual_orientation={profile?.sexual_orientation ?? 'null'}
+                              </p>
+
                               <p>
                                 <span className="font-medium">RPC get_discoverable_profiles:</span>{' '}
                                 {discoverDebug.rpcCount === null ? '—' : discoverDebug.rpcCount} result(s)
@@ -1732,9 +1739,12 @@ const ProfilePage = () => {
                                 {discoverDebug.blockedCount === null ? '—' : discoverDebug.blockedCount} /{' '}
                                 {discoverDebug.connectedCount === null ? '—' : discoverDebug.connectedCount}
                               </p>
-                              <p className="text-muted-foreground">
-                                If “Other profiles” is 0, the issue is your database has no profile rows for other users (not a frontend bug).
-                              </p>
+
+                              {!isAdmin && (
+                                <p className="text-muted-foreground">
+                                  Tip: append <span className="font-mono">&amp;debug=1</span> to the URL to keep this panel visible.
+                                </p>
+                              )}
                             </div>
                           )}
 
