@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { isValidUUID } from '@/lib/validation';
+import { generateBadgesFromQuizAnswers, getBadgeColorClass, QuizAnswer } from '@/lib/quizBadges';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -51,6 +53,7 @@ interface Profile {
   avatar_url?: string;
   gender?: string;
   sexual_orientation?: string;
+  looking_for?: string;
   country?: string;
   date_of_birth?: string;
   age_verified?: boolean;
@@ -114,6 +117,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const { isAdmin } = useIsAdmin();
   const [searchParams] = useSearchParams();
+  const isDebug = searchParams.get('debug') === '1';
   const [profile, setProfile] = useState<Profile | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -141,6 +145,21 @@ const ProfilePage = () => {
   const [blockedUsersProfiles, setBlockedUsersProfiles] = useState<BlockedUserProfile[]>([]);
   const [selectedMatchForGift, setSelectedMatchForGift] = useState<Match | null>(null);
   const [showOnlyUnverified, setShowOnlyUnverified] = useState(false);
+  const [discoverDebug, setDiscoverDebug] = useState<{
+    lastRun: string | null;
+    rpcCount: number | null;
+    rpcError: string | null;
+    otherProfilesCount: number | null;
+    blockedCount: number | null;
+    connectedCount: number | null;
+  }>({
+    lastRun: null,
+    rpcCount: null,
+    rpcError: null,
+    otherProfilesCount: null,
+    blockedCount: null,
+    connectedCount: null,
+  });
 
   const fetchQuizAnswers = async () => {
     if (!user?.id) return;
@@ -192,7 +211,7 @@ const ProfilePage = () => {
 
   const fetchProfile = async () => {
     if (!user?.id) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -201,7 +220,43 @@ const ProfilePage = () => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
-      
+
+      // If the profile row doesn't exist yet (common for fresh signups), create it then re-fetch.
+      if (!data) {
+        const nameFromMeta = (user.user_metadata as any)?.name as string | undefined;
+        const fallbackName = user.email?.split('@')[0] || 'User';
+
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              user_id: user.id,
+              name: (nameFromMeta || fallbackName).trim().slice(0, 100),
+              country: (user.user_metadata as any)?.country ?? null,
+              date_of_birth: (user.user_metadata as any)?.date_of_birth ?? null,
+            } as any,
+            { onConflict: 'user_id' }
+          );
+
+        const { data: created } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setProfile(created || null);
+        setProfileForm({
+          name: created?.name || '',
+          age: created?.age?.toString() || '',
+          bio: created?.bio || '',
+          location: created?.location || '',
+          interests: created?.interests?.join(', ') || '',
+          gender: created?.gender || '',
+          sexual_orientation: created?.sexual_orientation || '',
+        });
+        return;
+      }
+
       setProfile(data);
       setProfileForm({
         name: data?.name || '',
@@ -212,8 +267,8 @@ const ProfilePage = () => {
         gender: data?.gender || '',
         sexual_orientation: data?.sexual_orientation || '',
       });
-    } catch (error) {
-      // Error fetching profile - silent fail
+    } catch {
+      // Error fetching/creating profile - silent fail
     }
   };
 
@@ -272,118 +327,162 @@ const ProfilePage = () => {
 
   const fetchPotentialMatches = async () => {
     if (!user?.id) return;
+
+    setDiscoverDebug(prev => ({
+      ...prev,
+      lastRun: new Date().toISOString(),
+      rpcError: null,
+      rpcCount: null,
+      blockedCount: null,
+      connectedCount: null,
+    }));
     
     try {
-      // Use the get_discoverable_profiles RPC which includes gender/orientation compatibility
-      const { data: profiles, error } = await supabase
-        .rpc('get_discoverable_profiles');
-
+      // Primary source: get_discoverable_profiles (may be strict depending on DB function version)
+      const { data: rpcProfilesRaw, error } = await supabase.rpc('get_discoverable_profiles');
       if (error) throw error;
 
-      if (profiles) {
-        // Get users that the current user has blocked
-        const { data: currentBlockedData } = await supabase
-          .from('blocked_users' as any)
-          .select('blocked_user_id')
-          .eq('user_id', user.id);
-        
-        const currentBlockedIds = (currentBlockedData as any)?.map((b: any) => b.blocked_user_id) || [];
+      const rpcProfiles = Array.isArray(rpcProfilesRaw) ? rpcProfilesRaw : [];
 
-        // Get users who have blocked the current user (bidirectional check)
-        const { data: blockedByData } = await supabase
-          .from('blocked_users' as any)
-          .select('user_id')
-          .eq('blocked_user_id', user.id);
-        
-        const blockedByIds = (blockedByData as any)?.map((b: any) => b.user_id) || [];
+      setDiscoverDebug(prev => ({
+        ...prev,
+        rpcCount: rpcProfiles.length,
+      }));
 
-        // Combine both blocked lists
-        const allBlockedIds = [...new Set([...currentBlockedIds, ...blockedByIds])];
+      // Fallback: if RPC returns 0, show a basic list of other profiles so new signups aren't stuck.
+      // (This matches how Discover worked before compatibility filtering was introduced.)
+      let candidateProfiles: any[] = rpcProfiles;
+      if (candidateProfiles.length === 0) {
+        const { data: fallbackProfiles, error: fallbackError } = await supabase
+          .from('profiles')
+          .select('id, user_id, name, age, bio, location, avatar_url, interests, is_verified, country, date_of_birth, age_verified, verification_selfie_url, created_at, updated_at')
+          .neq('user_id', user.id)
+          .limit(50);
 
-        // Get all existing matches/requests
-        const { data: existingMatches } = await supabase
-          .from('matches')
-          .select('user1_id, user2_id')
-          .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
-
-        const connectedUserIds = new Set(
-          existingMatches?.map(m => 
-            m.user1_id === user.id ? m.user2_id : m.user1_id
-          ) || []
-        );
-        
-        // Filter out blocked users and users with existing match/request
-        const filteredProfiles = profiles.filter(p => {
-          const isBlocked = allBlockedIds.includes(p.user_id);
-          const isConnected = connectedUserIds.has(p.user_id);
-          return !isBlocked && !isConnected;
-        });
-        
-        // Calculate comprehensive compatibility scores for each potential match
-        const matchesWithScores = await Promise.all(
-          filteredProfiles.map(async (otherProfile) => {
-            let totalScore = 0;
-            
-            // 1. Quiz-based compatibility (40% weight)
-            try {
-              const { data: quizScore } = await supabase
-                .rpc('calculate_compatibility_score', {
-                  user1_id: user.id,
-                  user2_id: otherProfile.user_id
-                });
-              totalScore += (quizScore || 0) * 0.4;
-            } catch (error) {
-              // Error calculating compatibility - continue with other scores
-            }
-            
-            // 2. Age compatibility (30% weight)
-            let ageScore = 0;
-            if (profile?.age && otherProfile.age) {
-              const ageDifference = Math.abs(profile.age - otherProfile.age);
-              if (ageDifference <= 5) {
-                ageScore = 100;
-              } else if (ageDifference <= 10) {
-                ageScore = 70;
-              } else if (ageDifference <= 15) {
-                ageScore = 40;
-              } else {
-                ageScore = 20;
-              }
-            }
-            totalScore += (ageScore * 0.3);
-            
-            // 3. Location compatibility (30% weight)
-            let locationScore = 0;
-            if (profile?.location && otherProfile.location) {
-              const loc1 = profile.location.toLowerCase().trim();
-              const loc2 = otherProfile.location.toLowerCase().trim();
-              
-              if (loc1 === loc2) {
-                locationScore = 100;
-              } else if (loc1.split(',')[0] === loc2.split(',')[0]) {
-                locationScore = 70;
-              } else if (loc1.includes(loc2.split(',')[0]) || 
-                       loc2.includes(loc1.split(',')[0])) {
-                locationScore = 50;
-              } else {
-                locationScore = 20;
-              }
-            }
-            totalScore += (locationScore * 0.3);
-            
-            return {
-              ...otherProfile,
-              compatibility_score: Math.round(totalScore)
-            };
-          })
-        );
-
-        // Sort by comprehensive compatibility score (highest first)
-        matchesWithScores.sort((a, b) => b.compatibility_score - a.compatibility_score);
-        setPotentialMatches(matchesWithScores);
+        if (!fallbackError && Array.isArray(fallbackProfiles)) {
+          candidateProfiles = fallbackProfiles as any[];
+        }
       }
-    } catch (error) {
-      // Error fetching potential matches - silent fail
+
+      // Helpful sanity check in debug/admin mode: how many other profile rows exist at all?
+      if (isAdmin || isDebug) {
+        const { count } = await supabase
+          .from('profiles')
+          .select('user_id', { count: 'exact', head: true })
+          .neq('user_id', user.id);
+
+        setDiscoverDebug(prev => ({
+          ...prev,
+          otherProfilesCount: count ?? 0,
+        }));
+      }
+
+      if (!candidateProfiles || candidateProfiles.length === 0) {
+        setPotentialMatches([]);
+        return;
+      }
+
+      // Get users that the current user has blocked
+      const { data: currentBlockedData } = await supabase
+        .from('blocked_users' as any)
+        .select('blocked_user_id')
+        .eq('user_id', user.id);
+      
+      const currentBlockedIds = (currentBlockedData as any)?.map((b: any) => b.blocked_user_id) || [];
+
+      // Get users who have blocked the current user (bidirectional check)
+      const { data: blockedByData } = await supabase
+        .from('blocked_users' as any)
+        .select('user_id')
+        .eq('blocked_user_id', user.id);
+      
+      const blockedByIds = (blockedByData as any)?.map((b: any) => b.user_id) || [];
+
+      // Combine both blocked lists
+      const allBlockedIds = [...new Set([...currentBlockedIds, ...blockedByIds])];
+
+      // Get all existing matches/requests
+      const { data: existingMatches } = await supabase
+        .from('matches')
+        .select('user1_id, user2_id')
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+      const connectedUserIds = new Set(
+        existingMatches?.map(m => 
+          m.user1_id === user.id ? m.user2_id : m.user1_id
+        ) || []
+      );
+
+      setDiscoverDebug(prev => ({
+        ...prev,
+        blockedCount: allBlockedIds.length,
+        connectedCount: connectedUserIds.size,
+      }));
+      
+      // Filter out blocked users and users with existing match/request
+      const filteredProfiles = candidateProfiles.filter(p => {
+        const isBlocked = allBlockedIds.includes(p.user_id);
+        const isConnected = connectedUserIds.has(p.user_id);
+        return !isBlocked && !isConnected;
+      });
+      
+      // Calculate comprehensive compatibility scores for each potential match
+      const matchesWithScores = await Promise.all(
+        filteredProfiles.map(async (otherProfile) => {
+          let totalScore = 0;
+          
+          // 1. Quiz-based compatibility (40% weight)
+          try {
+            const { data: quizScore } = await supabase
+              .rpc('calculate_compatibility_score', {
+                user1_id: user.id,
+                user2_id: otherProfile.user_id
+              });
+            totalScore += (quizScore || 0) * 0.4;
+          } catch {
+            // Silent fail
+          }
+          
+          // 2. Age compatibility (30% weight)
+          let ageScore = 0;
+          if (profile?.age && otherProfile.age) {
+            const ageDifference = Math.abs(profile.age - otherProfile.age);
+            if (ageDifference <= 5) ageScore = 100;
+            else if (ageDifference <= 10) ageScore = 70;
+            else if (ageDifference <= 15) ageScore = 40;
+            else ageScore = 20;
+          }
+          totalScore += (ageScore * 0.3);
+          
+          // 3. Location compatibility (30% weight)
+          let locationScore = 0;
+          if (profile?.location && otherProfile.location) {
+            const loc1 = profile.location.toLowerCase().trim();
+            const loc2 = otherProfile.location.toLowerCase().trim();
+            
+            if (loc1 === loc2) locationScore = 100;
+            else if (loc1.split(',')[0] === loc2.split(',')[0]) locationScore = 70;
+            else if (loc1.includes(loc2.split(',')[0]) || loc2.includes(loc1.split(',')[0])) locationScore = 50;
+            else locationScore = 20;
+          }
+          totalScore += (locationScore * 0.3);
+          
+          return {
+            ...otherProfile,
+            compatibility_score: Math.round(totalScore)
+          };
+        })
+      );
+
+      // Sort by comprehensive compatibility score (highest first)
+      matchesWithScores.sort((a, b) => b.compatibility_score - a.compatibility_score);
+      setPotentialMatches(matchesWithScores);
+    } catch (error: any) {
+      setDiscoverDebug(prev => ({
+        ...prev,
+        rpcError: error?.message || 'Unknown error',
+      }));
+      setPotentialMatches([]);
     } finally {
       setLoading(false);
     }
@@ -1108,7 +1207,7 @@ const ProfilePage = () => {
                       )}
 
                       {profile?.interests && profile.interests.length > 0 && (
-                        <div>
+                        <div className="mb-4">
                           <h3 className="font-semibold text-sm text-muted-foreground mb-3">Interests</h3>
                           <div className="flex flex-wrap gap-2">
                             {profile.interests.map((interest, index) => (
@@ -1117,6 +1216,28 @@ const ProfilePage = () => {
                               </Badge>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Personality badges from quiz answers */}
+                      {quizAnswers.length > 0 && (
+                        <div>
+                          <h3 className="font-semibold text-sm text-muted-foreground mb-3">Personality Badges</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {generateBadgesFromQuizAnswers(quizAnswers as QuizAnswer[], 6).map((badge, index) => (
+                              <Badge 
+                                key={index} 
+                                variant="outline"
+                                className={cn("text-sm", getBadgeColorClass(badge.color))}
+                              >
+                                <span className="mr-1">{badge.emoji}</span>
+                                {badge.label}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Based on your quiz answers • <a href="/quiz" className="text-primary hover:underline">Retake quiz</a>
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1567,46 +1688,53 @@ const ProfilePage = () => {
               {/* Admin Deletion Requests Panel */}
               {isAdmin && <AdminDeletionRequestsPanel />}
 
-              {/* Prompt to upload verification selfie if not age verified (not for admins) */}
+              {/* Verification banners - show above matches but don't block browsing */}
               {!isAdmin && !profile?.age_verified && !profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20">
-                  <CardContent className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                      <AlertCircle className="w-10 h-10 text-amber-600 dark:text-amber-500" />
+                <Card className="shadow-soft border-2 border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20 mb-6">
+                  <CardContent className="py-6 px-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                        <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Age Verification Required</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Upload a verification selfie to connect with matches.
+                        </p>
+                      </div>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700"
+                        onClick={() => setActiveTab('profile')}
+                      >
+                        Verify Now
+                      </Button>
                     </div>
-                    <h3 className="font-semibold text-xl mb-2">Age Verification Required</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      To ensure safety and comply with regulations, please upload a verification selfie. This will be reviewed by our admin team before you can discover matches.
-                    </p>
-                    <Button 
-                      variant="default" 
-                      size="lg"
-                      className="bg-amber-600 hover:bg-amber-700"
-                      onClick={() => setActiveTab('profile')}
-                    >
-                      Upload Verification Selfie
-                    </Button>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Show pending verification message if selfie uploaded but not yet verified */}
               {!isAdmin && !profile?.age_verified && profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-blue-500/50 bg-gradient-to-br from-blue-50/50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20">
-                  <CardContent className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
-                      <ShieldCheck className="w-10 h-10 text-blue-600 dark:text-blue-500" />
+                <Card className="shadow-soft border-2 border-blue-500/50 bg-gradient-to-br from-blue-50/50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 mb-6">
+                  <CardContent className="py-6 px-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                        <ShieldCheck className="w-6 h-6 text-blue-600 dark:text-blue-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Verification Pending</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Your selfie is being reviewed. You can browse but can't connect until verified.
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-xl mb-2">Verification Pending</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Your verification selfie has been submitted and is being reviewed by our admin team. Please check back in 24 hours. You'll be able to discover matches once verified.
-                    </p>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Prompt to complete gender and orientation if missing */}
-              {(isAdmin || profile?.age_verified) && (!profile?.gender || !profile?.sexual_orientation) && (
+              {/* Prompt to complete quiz if gender + preference missing */}
+              {(!profile?.gender || (!profile?.looking_for && !profile?.sexual_orientation)) && (
                 <Card className="shadow-soft border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardContent className="text-center py-12">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
@@ -1614,29 +1742,28 @@ const ProfilePage = () => {
                     </div>
                     <h3 className="font-semibold text-xl mb-2">Complete Your Profile</h3>
                     <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Please complete your gender and sexual orientation preferences to discover compatible matches. This helps us show you the most relevant profiles.
+                      Take the compatibility quiz to discover compatible matches. This helps us show you the most relevant profiles.
                     </p>
                     <Button 
                       variant="magnetic" 
                       size="lg"
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setEditMode(true);
-                      }}
+                      onClick={() => setActiveTab('quiz')}
                     >
-                      Complete Profile
+                      Take Quiz Now
                     </Button>
                   </CardContent>
                 </Card>
               )}
               
-              {(isAdmin || profile?.age_verified) && profile?.gender && profile?.sexual_orientation && (
+              {/* Show matches if user has completed quiz (has gender + preference) */}
+              {profile?.gender && (profile?.looking_for || profile?.sexual_orientation) && (
                 <>
                   {(() => {
-                    // Filter matches based on admin toggle
                     const displayedMatches = showOnlyUnverified && isAdmin
                       ? potentialMatches.filter(m => !m.age_verified)
                       : potentialMatches;
+                    
+                    const canConnect = isAdmin || profile?.age_verified;
                     
                     return displayedMatches.length === 0 ? (
                       <Card className="shadow-soft">
@@ -1647,17 +1774,60 @@ const ProfilePage = () => {
                           <h3 className="font-semibold text-lg mb-2">
                             {showOnlyUnverified && isAdmin 
                               ? 'No unverified users found' 
-                              : 'No matches available'}
+                              : 'No compatible matches found'}
                           </h3>
                           <p className="text-muted-foreground mb-4">
                             {showOnlyUnverified && isAdmin
                               ? 'All users have been age verified!'
-                              : 'Complete the compatibility quiz to discover your perfect matches!'}
+                              : 'Check back later as new users join, or retake the quiz to update your preferences.'}
                           </p>
+
+                          {(isAdmin || isDebug) && (
+                            <div className="mt-4 text-left text-xs text-muted-foreground bg-muted/30 rounded-lg p-4 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-medium text-foreground/80">Discover debug</p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => fetchPotentialMatches()}
+                                  className="h-8"
+                                >
+                                  Retry fetch
+                                </Button>
+                              </div>
+
+                              <p>
+                                <span className="font-medium">You:</span>{' '}
+                                gender={profile?.gender ?? 'null'}, looking_for={profile?.looking_for ?? 'null'}, sexual_orientation={profile?.sexual_orientation ?? 'null'}
+                              </p>
+
+                              <p>
+                                <span className="font-medium">RPC get_discoverable_profiles:</span>{' '}
+                                {discoverDebug.rpcCount === null ? '—' : discoverDebug.rpcCount} result(s)
+                                {discoverDebug.rpcError ? ` • ${discoverDebug.rpcError}` : ''}
+                              </p>
+                              <p>
+                                <span className="font-medium">Other profiles in DB (excluding you):</span>{' '}
+                                {discoverDebug.otherProfilesCount === null ? '—' : discoverDebug.otherProfilesCount}
+                              </p>
+                              <p>
+                                <span className="font-medium">Filtered (blocked / connected):</span>{' '}
+                                {discoverDebug.blockedCount === null ? '—' : discoverDebug.blockedCount} /{' '}
+                                {discoverDebug.connectedCount === null ? '—' : discoverDebug.connectedCount}
+                              </p>
+
+                              {!isAdmin && (
+                                <p className="text-muted-foreground">
+                                  Tip: append <span className="font-mono">&amp;debug=1</span> to the URL to keep this panel visible.
+                                </p>
+                              )}
+                            </div>
+                          )}
+
                           {!showOnlyUnverified && (
                             <Button variant="gradient" size="lg" onClick={() => setActiveTab('quiz')}>
                               <RefreshCw className="w-4 h-4 mr-2" />
-                              Take Quiz Now
+                              Retake Quiz
                             </Button>
                           )}
                         </CardContent>
@@ -1684,7 +1854,7 @@ const ProfilePage = () => {
                               isOnline={false}
                               isVerified={potentialMatch.age_verified || false}
                               compatibilityScore={potentialMatch.compatibility_score}
-                              onConnect={() => sendMatch(potentialMatch.user_id)}
+                              onConnect={canConnect ? () => sendMatch(potentialMatch.user_id) : undefined}
                             />
                           </div>
                         ))}

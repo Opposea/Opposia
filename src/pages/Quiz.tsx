@@ -252,16 +252,36 @@ const Quiz = () => {
       }
 
       // Update profile with gender, looking_for, and derived sexual orientation
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          gender: dbGender,
-          looking_for: lookingFor,
-          sexual_orientation: sexualOrientation,
-        })
-        .eq("user_id", user.id);
+      const profilePatch = {
+        gender: dbGender,
+        looking_for: lookingFor,
+        sexual_orientation: sexualOrientation,
+      };
 
-      if (profileError) throw profileError;
+      const { data: updatedProfile, error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update(profilePatch)
+        .eq('user_id', user.id)
+        .select('user_id')
+        .maybeSingle();
+
+      if (profileUpdateError) throw profileUpdateError;
+
+      // If the profile row doesn't exist (common when the DB trigger isn't installed), create it.
+      if (!updatedProfile) {
+        const nameFromMeta = (user.user_metadata as any)?.name as string | undefined;
+        const fallbackName = user.email?.split('@')[0] || 'User';
+
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            name: (nameFromMeta || fallbackName).trim().slice(0, 100),
+            ...profilePatch,
+          } as any);
+
+        if (insertError) throw insertError;
+      }
 
       // Save quiz answers to database
       const answers = Object.entries(data).map(([questionId, answer]) => ({
