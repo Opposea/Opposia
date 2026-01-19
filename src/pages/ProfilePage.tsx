@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { isValidUUID } from '@/lib/validation';
+import { generateBadgesFromQuizAnswers, getBadgeColorClass, QuizAnswer } from '@/lib/quizBadges';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -1205,7 +1207,7 @@ const ProfilePage = () => {
                       )}
 
                       {profile?.interests && profile.interests.length > 0 && (
-                        <div>
+                        <div className="mb-4">
                           <h3 className="font-semibold text-sm text-muted-foreground mb-3">Interests</h3>
                           <div className="flex flex-wrap gap-2">
                             {profile.interests.map((interest, index) => (
@@ -1214,6 +1216,28 @@ const ProfilePage = () => {
                               </Badge>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Personality badges from quiz answers */}
+                      {quizAnswers.length > 0 && (
+                        <div>
+                          <h3 className="font-semibold text-sm text-muted-foreground mb-3">Personality Badges</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {generateBadgesFromQuizAnswers(quizAnswers as QuizAnswer[], 6).map((badge, index) => (
+                              <Badge 
+                                key={index} 
+                                variant="outline"
+                                className={cn("text-sm", getBadgeColorClass(badge.color))}
+                              >
+                                <span className="mr-1">{badge.emoji}</span>
+                                {badge.label}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Based on your quiz answers • <a href="/quiz" className="text-primary hover:underline">Retake quiz</a>
+                          </p>
                         </div>
                       )}
                     </div>
