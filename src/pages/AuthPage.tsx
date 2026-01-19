@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,6 @@ import { Heart, Eye, EyeOff, Shield, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRateLimit } from '@/hooks/useAuthRateLimit';
 import TermsOfServiceDialog from '@/components/TermsOfServiceDialog';
-import TurnstileWidget from '@/components/TurnstileWidget';
-
-const TURNSTILE_SITE_KEY = '0x4AAAAAACNSbE7cWdnQ7ZJk';
 
 const AuthPage = () => {
 const [isSignUp, setIsSignUp] = useState(false);
@@ -28,36 +25,6 @@ const [isSignUp, setIsSignUp] = useState(false);
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
-  const [captchaError, setCaptchaError] = useState(false);
-
-  const isNonProdHost = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.endsWith('lovable.app') ||
-    window.location.hostname.endsWith('lovableproject.com')
-  );
-
-  // Captcha is only enforced on production domains, and only for sign-up.
-  // (Preview domains often aren't allowlisted in Turnstile, which would block auth.)
-  const shouldShowCaptcha = !isNonProdHost && isSignUp;
-  const isCaptchaRequired = shouldShowCaptcha;
-
-  const handleCaptchaVerify = useCallback((token: string) => {
-    setCaptchaToken(token);
-    setCaptchaError(false);
-  }, []);
-
-  const handleCaptchaExpire = useCallback(() => {
-    setCaptchaToken(undefined);
-  }, []);
-
-  const handleCaptchaError = useCallback(() => {
-    setCaptchaToken(undefined);
-    setCaptchaError(true);
-    // Don't block user - allow sign-in but log the error
-    console.error('Captcha failed to load - allowing sign-in without captcha');
-  }, []);
   
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -196,49 +163,10 @@ const [isSignUp, setIsSignUp] = useState(false);
     await processAuth(sanitizedEmail, sanitizedName);
   };
 
-  const verifyTurnstile = async (token: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-turnstile', {
-        body: { token }
-      });
-
-      if (error) {
-        console.error('Turnstile verification error:', error);
-        return { success: false, message: 'Captcha verification failed. Please try again.' };
-      }
-
-      return { 
-        success: data.success, 
-        message: data.message 
-      };
-    } catch (err) {
-      console.error('Turnstile verification failed:', err);
-      return { success: false, message: 'Captcha verification failed. Please try again.' };
-    }
-  };
-
   const processAuth = async (sanitizedEmail: string, sanitizedName: string) => {
     setLoading(true);
 
     try {
-      // Captcha enforcement:
-      // - On preview domains, skip captcha entirely
-      // - On production, verify if token exists; gracefully allow if widget failed to load (captchaError=true)
-      if (isCaptchaRequired && captchaToken) {
-        const captchaResult = await verifyTurnstile(captchaToken);
-        if (!captchaResult.success) {
-          toast.error(captchaResult.message);
-          setCaptchaToken(undefined);
-          setLoading(false);
-          return;
-        }
-      } else if (isCaptchaRequired && !captchaToken && !captchaError) {
-        // Captcha required, not solved yet, and widget hasn't errored – show message
-        toast.error('Please complete the security check');
-        setLoading(false);
-        return;
-      }
-      // If captchaError is true we gracefully allow (widget could not load)
 
       let result;
       if (isSignUp) {
@@ -491,23 +419,13 @@ const [isSignUp, setIsSignUp] = useState(false);
               </>
             )}
 
-            {shouldShowCaptcha ? (
-              <TurnstileWidget
-                siteKey={TURNSTILE_SITE_KEY}
-                onVerify={handleCaptchaVerify}
-                onExpire={handleCaptchaExpire}
-                onError={handleCaptchaError}
-              />
-            ) : null}
-
             <Button
               type="submit"
               className="w-full"
               disabled={
                 loading ||
                 verifyingLocation ||
-                lockoutSeconds > 0 ||
-                (isCaptchaRequired && !captchaToken && !captchaError)
+                lockoutSeconds > 0
               }
             >
               {lockoutSeconds > 0 ? (
@@ -540,8 +458,6 @@ const [isSignUp, setIsSignUp] = useState(false);
                   setDateOfBirth('');
                   setCountry('');
                   setTermsAccepted(false);
-                  setCaptchaToken(undefined);
-                  setCaptchaError(false);
                 }}
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
