@@ -31,13 +31,15 @@ const [isSignUp, setIsSignUp] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
   const [captchaError, setCaptchaError] = useState(false);
 
-  const isPreviewHost =
-    typeof window !== 'undefined' &&
-    (window.location.hostname.endsWith('lovable.app') ||
-      window.location.hostname.endsWith('lovableproject.com'));
+  const isNonProdHost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('lovable.app') ||
+    window.location.hostname.endsWith('lovableproject.com')
+  );
 
   // Enforce captcha only on real domains (Turnstile keys must be configured per-domain)
-  const isCaptchaRequired = !isPreviewHost;
+  const isCaptchaRequired = !isNonProdHost;
 
   const handleCaptchaVerify = useCallback((token: string) => {
     setCaptchaToken(token);
