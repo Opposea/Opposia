@@ -222,15 +222,9 @@ const [isSignUp, setIsSignUp] = useState(false);
 
     try {
       // Captcha enforcement:
-      // - On preview domains, allow auth even if Turnstile can't load (common during setup)
-      // - On real domains, require a token and verify server-side
-      if (isCaptchaRequired) {
-        if (!captchaToken) {
-          toast.error('Please complete the captcha');
-          setLoading(false);
-          return;
-        }
-
+      // - On preview domains, skip captcha entirely
+      // - On production, verify if token exists; gracefully allow if widget failed to load (captchaError=true)
+      if (isCaptchaRequired && captchaToken) {
         const captchaResult = await verifyTurnstile(captchaToken);
         if (!captchaResult.success) {
           toast.error(captchaResult.message);
@@ -238,12 +232,13 @@ const [isSignUp, setIsSignUp] = useState(false);
           setLoading(false);
           return;
         }
-      } else {
-        // Preview: if Turnstile errors, don't block sign-in/sign-up
-        if (captchaError) {
-          console.warn('Turnstile unavailable on preview host; bypassing captcha.');
-        }
+      } else if (isCaptchaRequired && !captchaToken && !captchaError) {
+        // Captcha required, not solved yet, and widget hasn't errored – show message
+        toast.error('Please complete the security check');
+        setLoading(false);
+        return;
       }
+      // If captchaError is true we gracefully allow (widget could not load)
 
       let result;
       if (isSignUp) {
@@ -512,7 +507,7 @@ const [isSignUp, setIsSignUp] = useState(false);
                 loading ||
                 verifyingLocation ||
                 lockoutSeconds > 0 ||
-                (isCaptchaRequired && !captchaToken)
+                (isCaptchaRequired && !captchaToken && !captchaError)
               }
             >
               {lockoutSeconds > 0 ? (
