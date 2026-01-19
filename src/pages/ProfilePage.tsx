@@ -51,6 +51,7 @@ interface Profile {
   avatar_url?: string;
   gender?: string;
   sexual_orientation?: string;
+  looking_for?: string;
   country?: string;
   date_of_birth?: string;
   age_verified?: boolean;
@@ -1567,46 +1568,53 @@ const ProfilePage = () => {
               {/* Admin Deletion Requests Panel */}
               {isAdmin && <AdminDeletionRequestsPanel />}
 
-              {/* Prompt to upload verification selfie if not age verified (not for admins) */}
+              {/* Verification banners - show above matches but don't block browsing */}
               {!isAdmin && !profile?.age_verified && !profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20">
-                  <CardContent className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                      <AlertCircle className="w-10 h-10 text-amber-600 dark:text-amber-500" />
+                <Card className="shadow-soft border-2 border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20 mb-6">
+                  <CardContent className="py-6 px-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                        <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Age Verification Required</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Upload a verification selfie to connect with matches.
+                        </p>
+                      </div>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700"
+                        onClick={() => setActiveTab('profile')}
+                      >
+                        Verify Now
+                      </Button>
                     </div>
-                    <h3 className="font-semibold text-xl mb-2">Age Verification Required</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      To ensure safety and comply with regulations, please upload a verification selfie. This will be reviewed by our admin team before you can discover matches.
-                    </p>
-                    <Button 
-                      variant="default" 
-                      size="lg"
-                      className="bg-amber-600 hover:bg-amber-700"
-                      onClick={() => setActiveTab('profile')}
-                    >
-                      Upload Verification Selfie
-                    </Button>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Show pending verification message if selfie uploaded but not yet verified */}
               {!isAdmin && !profile?.age_verified && profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-blue-500/50 bg-gradient-to-br from-blue-50/50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20">
-                  <CardContent className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
-                      <ShieldCheck className="w-10 h-10 text-blue-600 dark:text-blue-500" />
+                <Card className="shadow-soft border-2 border-blue-500/50 bg-gradient-to-br from-blue-50/50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 mb-6">
+                  <CardContent className="py-6 px-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                        <ShieldCheck className="w-6 h-6 text-blue-600 dark:text-blue-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Verification Pending</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Your selfie is being reviewed. You can browse but can't connect until verified.
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-xl mb-2">Verification Pending</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Your verification selfie has been submitted and is being reviewed by our admin team. Please check back in 24 hours. You'll be able to discover matches once verified.
-                    </p>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Prompt to complete gender and orientation if missing */}
-              {(isAdmin || profile?.age_verified) && (!profile?.gender || !profile?.sexual_orientation) && (
+              {/* Prompt to complete quiz if gender/looking_for missing */}
+              {(!profile?.gender || !profile?.looking_for) && (
                 <Card className="shadow-soft border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardContent className="text-center py-12">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
@@ -1614,29 +1622,28 @@ const ProfilePage = () => {
                     </div>
                     <h3 className="font-semibold text-xl mb-2">Complete Your Profile</h3>
                     <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Please complete your gender and sexual orientation preferences to discover compatible matches. This helps us show you the most relevant profiles.
+                      Take the compatibility quiz to discover compatible matches. This helps us show you the most relevant profiles.
                     </p>
                     <Button 
                       variant="magnetic" 
                       size="lg"
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setEditMode(true);
-                      }}
+                      onClick={() => setActiveTab('quiz')}
                     >
-                      Complete Profile
+                      Take Quiz Now
                     </Button>
                   </CardContent>
                 </Card>
               )}
               
-              {(isAdmin || profile?.age_verified) && profile?.gender && profile?.sexual_orientation && (
+              {/* Show matches if user has completed quiz (has gender and looking_for) */}
+              {profile?.gender && profile?.looking_for && (
                 <>
                   {(() => {
-                    // Filter matches based on admin toggle
                     const displayedMatches = showOnlyUnverified && isAdmin
                       ? potentialMatches.filter(m => !m.age_verified)
                       : potentialMatches;
+                    
+                    const canConnect = isAdmin || profile?.age_verified;
                     
                     return displayedMatches.length === 0 ? (
                       <Card className="shadow-soft">
@@ -1647,17 +1654,17 @@ const ProfilePage = () => {
                           <h3 className="font-semibold text-lg mb-2">
                             {showOnlyUnverified && isAdmin 
                               ? 'No unverified users found' 
-                              : 'No matches available'}
+                              : 'No compatible matches found'}
                           </h3>
                           <p className="text-muted-foreground mb-4">
                             {showOnlyUnverified && isAdmin
                               ? 'All users have been age verified!'
-                              : 'Complete the compatibility quiz to discover your perfect matches!'}
+                              : 'Check back later as new users join, or retake the quiz to update your preferences.'}
                           </p>
                           {!showOnlyUnverified && (
                             <Button variant="gradient" size="lg" onClick={() => setActiveTab('quiz')}>
                               <RefreshCw className="w-4 h-4 mr-2" />
-                              Take Quiz Now
+                              Retake Quiz
                             </Button>
                           )}
                         </CardContent>
@@ -1684,7 +1691,7 @@ const ProfilePage = () => {
                               isOnline={false}
                               isVerified={potentialMatch.age_verified || false}
                               compatibilityScore={potentialMatch.compatibility_score}
-                              onConnect={() => sendMatch(potentialMatch.user_id)}
+                              onConnect={canConnect ? () => sendMatch(potentialMatch.user_id) : undefined}
                             />
                           </div>
                         ))}
