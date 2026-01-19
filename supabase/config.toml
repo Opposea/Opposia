@@ -15,3 +15,7 @@ verify_jwt = false
 # Security headers endpoint
 [functions.security-headers]
 verify_jwt = false
+
+# Turnstile captcha verification (public - called before auth)
+[functions.verify-turnstile]
+verify_jwt = false
