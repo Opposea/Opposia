@@ -31,6 +31,14 @@ const [isSignUp, setIsSignUp] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
   const [captchaError, setCaptchaError] = useState(false);
 
+  const isPreviewHost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname.endsWith('lovable.app') ||
+      window.location.hostname.endsWith('lovableproject.com'));
+
+  // Enforce captcha only on real domains (Turnstile keys must be configured per-domain)
+  const isCaptchaRequired = !isPreviewHost;
+
   const handleCaptchaVerify = useCallback((token: string) => {
     setCaptchaToken(token);
     setCaptchaError(false);
@@ -209,8 +217,16 @@ const [isSignUp, setIsSignUp] = useState(false);
     setLoading(true);
 
     try {
-      // Verify captcha if available (skip if captcha failed to load)
-      if (captchaToken) {
+      // Captcha enforcement:
+      // - On preview domains, allow auth even if Turnstile can't load (common during setup)
+      // - On real domains, require a token and verify server-side
+      if (isCaptchaRequired) {
+        if (!captchaToken) {
+          toast.error('Please complete the captcha');
+          setLoading(false);
+          return;
+        }
+
         const captchaResult = await verifyTurnstile(captchaToken);
         if (!captchaResult.success) {
           toast.error(captchaResult.message);
@@ -218,13 +234,12 @@ const [isSignUp, setIsSignUp] = useState(false);
           setLoading(false);
           return;
         }
-      } else if (!captchaError) {
-        // Captcha not loaded and no error - shouldn't reach here due to button disabled
-        toast.error('Please complete the captcha');
-        setLoading(false);
-        return;
+      } else {
+        // Preview: if Turnstile errors, don't block sign-in/sign-up
+        if (captchaError) {
+          console.warn('Turnstile unavailable on preview host; bypassing captcha.');
+        }
       }
-      // If captchaError is true, we skip captcha verification
 
       let result;
       if (isSignUp) {
@@ -487,7 +502,12 @@ const [isSignUp, setIsSignUp] = useState(false);
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || verifyingLocation || lockoutSeconds > 0 || (!captchaToken && !captchaError)}
+              disabled={
+                loading ||
+                verifyingLocation ||
+                lockoutSeconds > 0 ||
+                (isCaptchaRequired && !captchaToken)
+              }
             >
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
