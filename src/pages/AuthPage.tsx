@@ -29,9 +29,11 @@ const [isSignUp, setIsSignUp] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
+  const [captchaError, setCaptchaError] = useState(false);
 
   const handleCaptchaVerify = useCallback((token: string) => {
     setCaptchaToken(token);
+    setCaptchaError(false);
   }, []);
 
   const handleCaptchaExpire = useCallback(() => {
@@ -40,7 +42,9 @@ const [isSignUp, setIsSignUp] = useState(false);
 
   const handleCaptchaError = useCallback(() => {
     setCaptchaToken(undefined);
-    toast.error('Captcha failed to load. Please refresh the page.');
+    setCaptchaError(true);
+    // Don't block user - allow sign-in but log the error
+    console.error('Captcha failed to load - allowing sign-in without captcha');
   }, []);
   
   const { signUp, signIn, user } = useAuth();
@@ -205,20 +209,22 @@ const [isSignUp, setIsSignUp] = useState(false);
     setLoading(true);
 
     try {
-      // Verify captcha first
-      if (!captchaToken) {
+      // Verify captcha if available (skip if captcha failed to load)
+      if (captchaToken) {
+        const captchaResult = await verifyTurnstile(captchaToken);
+        if (!captchaResult.success) {
+          toast.error(captchaResult.message);
+          setCaptchaToken(undefined);
+          setLoading(false);
+          return;
+        }
+      } else if (!captchaError) {
+        // Captcha not loaded and no error - shouldn't reach here due to button disabled
         toast.error('Please complete the captcha');
         setLoading(false);
         return;
       }
-
-      const captchaResult = await verifyTurnstile(captchaToken);
-      if (!captchaResult.success) {
-        toast.error(captchaResult.message);
-        setCaptchaToken(undefined);
-        setLoading(false);
-        return;
-      }
+      // If captchaError is true, we skip captcha verification
 
       let result;
       if (isSignUp) {
@@ -481,7 +487,7 @@ const [isSignUp, setIsSignUp] = useState(false);
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || verifyingLocation || lockoutSeconds > 0 || !captchaToken}
+              disabled={loading || verifyingLocation || lockoutSeconds > 0 || (!captchaToken && !captchaError)}
             >
               {lockoutSeconds > 0 ? (
                 <span className="flex items-center gap-2">
