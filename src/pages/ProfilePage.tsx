@@ -209,7 +209,7 @@ const ProfilePage = () => {
 
   const fetchProfile = async () => {
     if (!user?.id) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -218,7 +218,43 @@ const ProfilePage = () => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
-      
+
+      // If the profile row doesn't exist yet (common for fresh signups), create it then re-fetch.
+      if (!data) {
+        const nameFromMeta = (user.user_metadata as any)?.name as string | undefined;
+        const fallbackName = user.email?.split('@')[0] || 'User';
+
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              user_id: user.id,
+              name: (nameFromMeta || fallbackName).trim().slice(0, 100),
+              country: (user.user_metadata as any)?.country ?? null,
+              date_of_birth: (user.user_metadata as any)?.date_of_birth ?? null,
+            } as any,
+            { onConflict: 'user_id' }
+          );
+
+        const { data: created } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setProfile(created || null);
+        setProfileForm({
+          name: created?.name || '',
+          age: created?.age?.toString() || '',
+          bio: created?.bio || '',
+          location: created?.location || '',
+          interests: created?.interests?.join(', ') || '',
+          gender: created?.gender || '',
+          sexual_orientation: created?.sexual_orientation || '',
+        });
+        return;
+      }
+
       setProfile(data);
       setProfileForm({
         name: data?.name || '',
@@ -229,8 +265,8 @@ const ProfilePage = () => {
         gender: data?.gender || '',
         sexual_orientation: data?.sexual_orientation || '',
       });
-    } catch (error) {
-      // Error fetching profile - silent fail
+    } catch {
+      // Error fetching/creating profile - silent fail
     }
   };
 
@@ -300,15 +336,31 @@ const ProfilePage = () => {
     }));
     
     try {
-      // Use the get_discoverable_profiles RPC which includes compatibility filtering
-      const { data: profiles, error } = await supabase.rpc('get_discoverable_profiles');
-
+      // Primary source: get_discoverable_profiles (may be strict depending on DB function version)
+      const { data: rpcProfilesRaw, error } = await supabase.rpc('get_discoverable_profiles');
       if (error) throw error;
+
+      const rpcProfiles = Array.isArray(rpcProfilesRaw) ? rpcProfilesRaw : [];
 
       setDiscoverDebug(prev => ({
         ...prev,
-        rpcCount: Array.isArray(profiles) ? profiles.length : 0,
+        rpcCount: rpcProfiles.length,
       }));
+
+      // Fallback: if RPC returns 0, show a basic list of other profiles so new signups aren't stuck.
+      // (This matches how Discover worked before compatibility filtering was introduced.)
+      let candidateProfiles: any[] = rpcProfiles;
+      if (candidateProfiles.length === 0) {
+        const { data: fallbackProfiles, error: fallbackError } = await supabase
+          .from('profiles')
+          .select('id, user_id, name, age, bio, location, avatar_url, interests, is_verified, country, date_of_birth, age_verified, verification_selfie_url, created_at, updated_at')
+          .neq('user_id', user.id)
+          .limit(50);
+
+        if (!fallbackError && Array.isArray(fallbackProfiles)) {
+          candidateProfiles = fallbackProfiles as any[];
+        }
+      }
 
       // Helpful sanity check in debug/admin mode: how many other profile rows exist at all?
       if (isAdmin || isDebug) {
@@ -323,7 +375,7 @@ const ProfilePage = () => {
         }));
       }
 
-      if (!profiles) {
+      if (!candidateProfiles || candidateProfiles.length === 0) {
         setPotentialMatches([]);
         return;
       }
@@ -366,7 +418,7 @@ const ProfilePage = () => {
       }));
       
       // Filter out blocked users and users with existing match/request
-      const filteredProfiles = profiles.filter(p => {
+      const filteredProfiles = candidateProfiles.filter(p => {
         const isBlocked = allBlockedIds.includes(p.user_id);
         const isConnected = connectedUserIds.has(p.user_id);
         return !isBlocked && !isConnected;
