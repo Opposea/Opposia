@@ -429,50 +429,26 @@ const ProfilePage = () => {
         return !isBlocked && !isConnected;
       });
       
-      // Calculate comprehensive compatibility scores for each potential match
+      // Calculate compatibility scores using the database function
+      // The DB function already includes: 70% quiz (opposite answers) + 20% age + 10% location
       const matchesWithScores = await Promise.all(
         filteredProfiles.map(async (otherProfile) => {
-          let totalScore = 0;
+          let compatibilityScore = 0;
           
-          // 1. Quiz-based compatibility (40% weight)
           try {
-            const { data: quizScore } = await supabase
+            const { data: dbScore } = await supabase
               .rpc('calculate_compatibility_score', {
                 user1_id: user.id,
                 user2_id: otherProfile.user_id
               });
-            totalScore += (quizScore || 0) * 0.4;
+            compatibilityScore = dbScore || 0;
           } catch {
-            // Silent fail
+            // Silent fail - score stays at 0
           }
-          
-          // 2. Age compatibility (30% weight)
-          let ageScore = 0;
-          if (profile?.age && otherProfile.age) {
-            const ageDifference = Math.abs(profile.age - otherProfile.age);
-            if (ageDifference <= 5) ageScore = 100;
-            else if (ageDifference <= 10) ageScore = 70;
-            else if (ageDifference <= 15) ageScore = 40;
-            else ageScore = 20;
-          }
-          totalScore += (ageScore * 0.3);
-          
-          // 3. Location compatibility (30% weight)
-          let locationScore = 0;
-          if (profile?.location && otherProfile.location) {
-            const loc1 = profile.location.toLowerCase().trim();
-            const loc2 = otherProfile.location.toLowerCase().trim();
-            
-            if (loc1 === loc2) locationScore = 100;
-            else if (loc1.split(',')[0] === loc2.split(',')[0]) locationScore = 70;
-            else if (loc1.includes(loc2.split(',')[0]) || loc2.includes(loc1.split(',')[0])) locationScore = 50;
-            else locationScore = 20;
-          }
-          totalScore += (locationScore * 0.3);
           
           return {
             ...otherProfile,
-            compatibility_score: Math.round(totalScore)
+            compatibility_score: Math.round(compatibilityScore)
           };
         })
       );
