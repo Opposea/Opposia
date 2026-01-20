@@ -1109,21 +1109,6 @@ const ProfilePage = () => {
                             <option value="non-binary/trans">Non-binary/Trans</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="text-sm font-medium block mb-2">Sexual Orientation</label>
-                          <select
-                            value={profileForm.sexual_orientation}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, sexual_orientation: e.target.value }))}
-                            className="w-full h-10 px-3 rounded-md border border-primary/20 bg-background"
-                          >
-                            <option value="">Select orientation</option>
-                            <option value="straight">Straight</option>
-                            <option value="gay">Gay</option>
-                            <option value="lesbian">Lesbian</option>
-                            <option value="bi">Bi</option>
-                            <option value="pansexual">Pansexual</option>
-                          </select>
-                        </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium block mb-2">Location</label>
