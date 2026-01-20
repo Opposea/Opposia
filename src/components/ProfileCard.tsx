@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { generateBadgesFromQuizAnswers, getBadgeColorClass, QuizBadge, QuizAnswer } from '@/lib/quizBadges';
 
 interface ProfileCardProps {
   id: string;
@@ -39,6 +41,32 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onMessage,
   className
 }) => {
+  const [quizBadges, setQuizBadges] = useState<QuizBadge[]>([]);
+
+  useEffect(() => {
+    const fetchQuizBadges = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('quiz_answers')
+          .select('question_id, answer')
+          .eq('user_id', id);
+
+        if (error) throw error;
+        
+        if (data) {
+          const badges = generateBadgesFromQuizAnswers(data as QuizAnswer[], 3);
+          setQuizBadges(badges);
+        }
+      } catch (error) {
+        // Silent fail for badges
+      }
+    };
+
+    fetchQuizBadges();
+  }, [id]);
+
   return (
     <Card className={cn("hover-lift overflow-hidden", className)}>
       <CardContent className="p-0">
@@ -96,7 +124,24 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </p>
             )}
 
-            {interests.length > 0 && (
+            {/* Personality badges from quiz */}
+            {quizBadges.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {quizBadges.map((badge, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="outline"
+                    className={cn("text-xs", getBadgeColorClass(badge.color))}
+                  >
+                    <span className="mr-1">{badge.emoji}</span>
+                    {badge.label}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Interests - only show if no quiz badges */}
+            {quizBadges.length === 0 && interests.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {interests.slice(0, 3).map((interest, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
@@ -114,7 +159,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <div className="flex gap-2 pt-2">
               {onConnect && (
                 <Button 
-                  onClick={onConnect}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onConnect();
+                  }}
                   className="flex-1 gradient-primary"
                   size="sm"
                   aria-label={`Connect with ${name}`}
@@ -125,7 +173,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               )}
               {onMessage && (
                 <Button 
-                  onClick={onMessage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMessage();
+                  }}
                   variant="outline"
                   size="sm"
                   className="flex-1"
