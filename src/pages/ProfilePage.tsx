@@ -36,6 +36,7 @@ import EnlargedProfileView from '@/components/EnlargedProfileView';
 import SwipeableMatchStack from '@/components/SwipeableMatchStack';
 import GiftSender from '@/components/GiftSender';
 import AdminDeletionRequestsPanel from '@/components/AdminDeletionRequestsPanel';
+import AdminMatchingHealthCheck from '@/components/AdminMatchingHealthCheck';
 
 import { VerificationSelfieUpload } from '@/components/VerificationSelfieUpload';
 import { z } from 'zod';
@@ -1685,8 +1686,13 @@ const ProfilePage = () => {
                 </Card>
               )}
 
-              {/* Admin Deletion Requests Panel */}
-              {isAdmin && <AdminDeletionRequestsPanel />}
+              {/* Admin Panels */}
+              {isAdmin && (
+                <div className="space-y-4 mb-6">
+                  <AdminMatchingHealthCheck />
+                  <AdminDeletionRequestsPanel />
+                </div>
+              )}
 
               {/* Verification banners - show above matches but don't block browsing */}
               {!isAdmin && !profile?.age_verified && !profile?.verification_selfie_url && (
