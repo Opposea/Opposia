@@ -207,11 +207,4 @@ GRANT EXECUTE ON FUNCTION public.calculate_compatibility_score(uuid, uuid) TO au
 
 ## After running the patch
 
-To recalculate all existing match scores, run this additional query:
-
-```sql
--- Update all existing matches with recalculated scores
-UPDATE public.matches m
-SET compatibility_score = public.calculate_compatibility_score(m.user1_id, m.user2_id)
-WHERE m.user1_id IS NOT NULL AND m.user2_id IS NOT NULL;
-```
+Compatibility scores are **calculated dynamically** via `public.calculate_compatibility_score(user1_id, user2_id)` and are **not stored** in the `matches` table, so there is nothing to backfill—just refresh the app (or re-open Discover/Matches) to see updated percentages.
