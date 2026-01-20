@@ -1763,7 +1763,7 @@ const ProfilePage = () => {
                       ? potentialMatches.filter(m => !m.age_verified)
                       : potentialMatches;
                     
-                    const canConnect = isAdmin || profile?.age_verified;
+                    const canConnect = true; // Allow all users to connect
                     
                     return displayedMatches.length === 0 ? (
                       <Card className="shadow-soft">
