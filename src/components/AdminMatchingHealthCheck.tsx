@@ -226,7 +226,7 @@ const AdminMatchingHealthCheck = () => {
         });
       }
 
-      // 6) check_one_way_compatibility using REAL stored values
+      // 6) check_one_way_compatibility using REAL stored values (both directions)
       const tOneWayStart = performance.now();
       try {
         const { data: targetProfile, error: targetProfileError } = await supabase
@@ -243,27 +243,50 @@ const AdminMatchingHealthCheck = () => {
             duration: Math.round(performance.now() - tOneWayStart),
           });
         } else {
-          const { data, error } = await supabase.rpc('check_one_way_compatibility', {
+          const viewerToTarget = await supabase.rpc('check_one_way_compatibility', {
             viewer_gender: viewerGender ?? '',
             viewer_orientation: viewerOrientation ?? '',
             target_gender: targetProfile?.gender ?? '',
             target_orientation: targetProfile?.sexual_orientation ?? '',
           });
 
+          const targetToViewer = await supabase.rpc('check_one_way_compatibility', {
+            viewer_gender: targetProfile?.gender ?? '',
+            viewer_orientation: targetProfile?.sexual_orientation ?? '',
+            target_gender: viewerGender ?? '',
+            target_orientation: viewerOrientation ?? '',
+          });
+
           const duration = Math.round(performance.now() - tOneWayStart);
 
-          if (error) {
+          if (viewerToTarget.error) {
             push(newResults, {
-              name: 'check_one_way_compatibility',
+              name: 'check_one_way_compatibility (A → B)',
               passed: false,
-              message: `Error: ${error.message}`,
+              message: `Error: ${viewerToTarget.error.message}`,
               duration,
             });
           } else {
             push(newResults, {
-              name: 'check_one_way_compatibility',
+              name: 'check_one_way_compatibility (A → B)',
               passed: true,
-              message: `viewer(${viewerGender}/${viewerOrientation}) → target(${targetProfile?.gender}/${targetProfile?.sexual_orientation}) = ${String(data)}`,
+              message: `viewer(${viewerGender}/${viewerOrientation}) → target(${targetProfile?.gender}/${targetProfile?.sexual_orientation}) = ${String(viewerToTarget.data)}`,
+              duration,
+            });
+          }
+
+          if (targetToViewer.error) {
+            push(newResults, {
+              name: 'check_one_way_compatibility (B → A)',
+              passed: false,
+              message: `Error: ${targetToViewer.error.message}`,
+              duration,
+            });
+          } else {
+            push(newResults, {
+              name: 'check_one_way_compatibility (B → A)',
+              passed: true,
+              message: `target(${targetProfile?.gender}/${targetProfile?.sexual_orientation}) → viewer(${viewerGender}/${viewerOrientation}) = ${String(targetToViewer.data)}`,
               duration,
             });
           }
