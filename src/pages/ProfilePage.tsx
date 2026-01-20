@@ -831,16 +831,24 @@ const ProfilePage = () => {
     }
     
     try {
-      // Optional: Check compatibility (warning only, does not block)
-      const { data: isCompatible } = await supabase
+      // CRITICAL: Check compatibility BEFORE sending match request
+      const { data: isCompatible, error: compatError } = await supabase
         .rpc('are_users_compatible', {
           user_a_id: user?.id,
           user_b_id: targetUserId
         });
 
-      // Log compatibility but don't block - Discover tab already filters compatible users
-      if (isCompatible === false) {
-        console.log('Compatibility check returned false, but proceeding with match request');
+      if (compatError) {
+        throw compatError;
+      }
+
+      if (!isCompatible) {
+        toast({
+          title: "Not Compatible",
+          description: "You cannot send a match request to this user based on compatibility preferences.",
+          variant: "destructive",
+        });
+        return;
       }
 
       // Check if a match already exists between these two users (in either direction)
@@ -1755,7 +1763,7 @@ const ProfilePage = () => {
                       ? potentialMatches.filter(m => !m.age_verified)
                       : potentialMatches;
                     
-                    const canConnect = true; // Allow all users to connect
+                    const canConnect = isAdmin || profile?.age_verified;
                     
                     return displayedMatches.length === 0 ? (
                       <Card className="shadow-soft">
