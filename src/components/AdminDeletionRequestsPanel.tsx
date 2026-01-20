@@ -52,7 +52,7 @@ const AdminDeletionRequestsPanel: React.FC = () => {
       const { data, error } = await supabase
         .from('deletion_requests')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('requested_at', { ascending: false });
 
       if (error) throw error;
       setRequests(data || []);
@@ -98,7 +98,6 @@ const AdminDeletionRequestsPanel: React.FC = () => {
         .from('deletion_requests')
         .update({
           status: action === 'approve' ? 'completed' : 'rejected',
-          processed_at: new Date().toISOString(),
         })
         .eq('id', requestId);
 
