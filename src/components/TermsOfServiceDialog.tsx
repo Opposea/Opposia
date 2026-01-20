@@ -21,6 +21,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [hasAccepted, setHasAccepted] = useState(false);
   const [hasConsentedOrientation, setHasConsentedOrientation] = useState(false);
+  const [hasAgreedNoMoney, setHasAgreedNoMoney] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset state when dialog opens
@@ -29,6 +30,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
       setHasScrolledToBottom(false);
       setHasAccepted(false);
       setHasConsentedOrientation(false);
+      setHasAgreedNoMoney(false);
       // Reset scroll position
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
@@ -233,6 +235,17 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
                 I explicitly consent to my sexual orientation being processed to provide me with relevant matches
               </Label>
             </div>
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="agree-no-money" 
+                checked={hasAgreedNoMoney}
+                onCheckedChange={(checked) => setHasAgreedNoMoney(checked === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="agree-no-money" className="text-sm cursor-pointer leading-tight">
+                I will not under any circumstances give other users any money
+              </Label>
+            </div>
           </div>
         )}
 
@@ -242,7 +255,7 @@ const TermsOfServiceDialog = ({ open, onAccept, onDecline }: TermsOfServiceDialo
           </Button>
           <Button 
             onClick={onAccept} 
-            disabled={!hasScrolledToBottom || !hasAccepted || !hasConsentedOrientation}
+            disabled={!hasScrolledToBottom || !hasAccepted || !hasConsentedOrientation || !hasAgreedNoMoney}
           >
             Accept & Continue
           </Button>
