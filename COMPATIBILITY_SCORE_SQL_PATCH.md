@@ -82,19 +82,18 @@ DECLARE
     'avoid'
   ];
 
-  -- "Together" answers (high tier match)
+  -- "Together" answers (perfect match when both choose it)
+  -- IMPORTANT: keep this strict (only values that literally mean "together")
   together_answers TEXT[] := ARRAY[
-    'together',
-    'both',
-    'share',
-    'equal',
-    'either',
-    'flexible'
+    'together'
   ];
 
-  -- "Sometimes" answers (match tier)
+  -- "Sometimes / share" answers (match tier)
+  -- These are explicitly "shared" but not necessarily "always together".
   sometimes_answers TEXT[] := ARRAY[
     'sometimes',
+    'share',
+    'pack-fine',
     'basics',
     'contribute',
     'easy',
@@ -164,10 +163,12 @@ BEGIN
 
   IF total_questions > 0 THEN
     -- Quiz contributes up to 80 points
-    -- Opposites = 1.0 (full), Together = 0.8, Sometimes = 0.8
+    -- Opposites = 1.0 (full), Together = 1.0 (perfect match), Sometimes/Share = 0.8
+    -- This ensures that if both users answered "together" on every scored question,
+    -- their quiz component is 80/80.
     compatibility_score := ROUND(
       ((opposite_answers::DECIMAL * 1.0
-        + together_matches::DECIMAL * 0.8
+        + together_matches::DECIMAL * 1.0
         + sometimes_matches::DECIMAL * 0.8
       ) / total_questions::DECIMAL) * 80
     );
