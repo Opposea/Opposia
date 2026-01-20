@@ -188,25 +188,29 @@ const Quiz = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSelfieUrl, setCurrentSelfieUrl] = useState<string | null>(null);
+  const [isAgeVerified, setIsAgeVerified] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isAdmin } = useIsAdmin();
 
-  const fetchCurrentSelfie = async () => {
+  const fetchVerificationStatus = async () => {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('verification_selfie_url')
+      .select('verification_selfie_url, age_verified')
       .eq('user_id', user.id)
       .single();
     if (data?.verification_selfie_url) {
       setCurrentSelfieUrl(data.verification_selfie_url);
     }
+    if (data?.age_verified) {
+      setIsAgeVerified(true);
+    }
   };
 
   useEffect(() => {
-    fetchCurrentSelfie();
+    fetchVerificationStatus();
   }, [user]);
   
   const form = useForm({
@@ -352,13 +356,16 @@ const Quiz = () => {
             </CardContent>
           </Card>
 
-          <VerificationSelfieUpload 
-            currentSelfieUrl={currentSelfieUrl}
-            onComplete={() => fetchCurrentSelfie()}
-          />
+          {/* Only show verification upload if not already verified */}
+          {!isAgeVerified && (
+            <VerificationSelfieUpload 
+              currentSelfieUrl={currentSelfieUrl}
+              onComplete={() => fetchVerificationStatus()}
+            />
+          )}
 
           <div className="space-y-4">
-            {!isAdmin && !currentSelfieUrl && (
+            {!isAdmin && !isAgeVerified && !currentSelfieUrl && (
               <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-500/50">
                 <CardContent className="py-4 text-center">
                   <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center justify-center gap-2">
@@ -373,7 +380,7 @@ const Quiz = () => {
               size="lg" 
               className="w-full"
               onClick={() => navigate('/profile?tab=discover')}
-              disabled={!isAdmin && !currentSelfieUrl}
+              disabled={!isAdmin && !isAgeVerified && !currentSelfieUrl}
             >
               Discover Your Matches
             </Button>
