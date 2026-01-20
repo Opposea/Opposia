@@ -350,10 +350,12 @@ const ProfilePage = () => {
         rpcCount: rpcProfiles.length,
       }));
 
-      // Fallback: if RPC returns 0, show a basic list of other profiles so new signups aren't stuck.
-      // (This matches how Discover worked before compatibility filtering was introduced.)
+      // Fallback: if RPC returns 0, ONLY show a basic list in admin/debug mode.
+      // Regular users should never see potentially incompatible profiles.
       let candidateProfiles: any[] = rpcProfiles;
-      if (candidateProfiles.length === 0) {
+      const allowFallback = isAdmin || isDebug;
+
+      if (candidateProfiles.length === 0 && allowFallback) {
         const { data: fallbackProfiles, error: fallbackError } = await supabase
           .from('profiles')
           .select('id, user_id, name, age, bio, location, avatar_url, interests, is_verified, country, date_of_birth, age_verified, verification_selfie_url, created_at, updated_at')
@@ -830,12 +832,14 @@ const ProfilePage = () => {
       });
       return;
     }
+
+    if (!user?.id) return;
     
     try {
       // CRITICAL: Check compatibility BEFORE sending match request
       const { data: isCompatible, error: compatError } = await supabase
         .rpc('are_users_compatible', {
-          user_a_id: user?.id,
+          user_a_id: user.id,
           user_b_id: targetUserId
         });
 
@@ -856,7 +860,7 @@ const ProfilePage = () => {
       const { data: existingMatches, error: checkError } = await supabase
         .from('matches')
         .select('*')
-        .or(`and(user1_id.eq.${user?.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user?.id})`);
+        .or(`and(user1_id.eq.${user.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user.id})`);
 
       if (checkError) {
         throw checkError;
