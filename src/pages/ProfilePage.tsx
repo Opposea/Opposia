@@ -146,6 +146,7 @@ const ProfilePage = () => {
   const [blockedUsersProfiles, setBlockedUsersProfiles] = useState<BlockedUserProfile[]>([]);
   const [selectedMatchForGift, setSelectedMatchForGift] = useState<Match | null>(null);
   const [showOnlyUnverified, setShowOnlyUnverified] = useState(false);
+  const [unverifiedUsers, setUnverifiedUsers] = useState<Profile[]>([]);
   const [discoverDebug, setDiscoverDebug] = useState<{
     lastRun: string | null;
     rpcCount: number | null;
@@ -186,8 +187,11 @@ const ProfilePage = () => {
       fetchPotentialMatches();
       fetchQuizAnswers();
       fetchBlockedUsers();
+      if (isAdmin) {
+        fetchUnverifiedUsers();
+      }
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   // Handle gift completion after payment
   useEffect(() => {
@@ -464,6 +468,26 @@ const ProfilePage = () => {
       setPotentialMatches([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch ALL unverified users for admin verification queue (bypasses compatibility filtering)
+  const fetchUnverifiedUsers = async () => {
+    if (!user?.id || !isAdmin) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, user_id, name, age, bio, location, avatar_url, interests, is_verified, country, date_of_birth, age_verified, verification_selfie_url, created_at, updated_at')
+        .eq('age_verified', false)
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUnverifiedUsers((data as any as Profile[]) || []);
+    } catch (error) {
+      console.error('Error fetching unverified users:', error);
+      setUnverifiedUsers([]);
     }
   };
 
@@ -1638,14 +1662,26 @@ const ProfilePage = () => {
                           <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-500" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm">Admin Verification Filter</h3>
-                          <p className="text-xs text-muted-foreground">Show only users needing age verification</p>
+                          <h3 className="font-semibold text-sm">Admin Verification Queue</h3>
+                          <p className="text-xs text-muted-foreground">
+                            {unverifiedUsers.length} user{unverifiedUsers.length !== 1 ? 's' : ''} awaiting verification
+                          </p>
                         </div>
                       </div>
-                      <Switch
-                        checked={showOnlyUnverified}
-                        onCheckedChange={setShowOnlyUnverified}
-                      />
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fetchUnverifiedUsers()}
+                          className="h-8"
+                        >
+                          Refresh
+                        </Button>
+                        <Switch
+                          checked={showOnlyUnverified}
+                          onCheckedChange={setShowOnlyUnverified}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1730,8 +1766,9 @@ const ProfilePage = () => {
               {profile?.gender && (profile?.looking_for || profile?.sexual_orientation) && (
                 <>
                   {(() => {
+                    // When admin filter is on, use the dedicated unverified users list (bypasses compatibility)
                     const displayedMatches = showOnlyUnverified && isAdmin
-                      ? potentialMatches.filter(m => !m.age_verified)
+                      ? unverifiedUsers.map(u => ({ ...u, compatibility_score: 0 }))
                       : potentialMatches;
                     
                     const canConnect = isAdmin || profile?.age_verified;
