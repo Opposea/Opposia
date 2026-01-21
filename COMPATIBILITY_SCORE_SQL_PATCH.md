@@ -44,6 +44,26 @@ DECLARE
   user1_location TEXT;
   user2_location TEXT;
 
+  -- Scored quiz questions (exclude legacy/retired questions that may still exist in quiz_answers)
+  -- IMPORTANT: keep this list in sync with the current quiz in src/pages/Quiz.tsx
+  scored_question_ids TEXT[] := ARRAY[
+    'cooking',
+    'dishes',
+    'driving',
+    'finances',
+    'planning_events',
+    'fixing_things',
+    'decorating',
+    'grocery_shopping',
+    'customer_service',
+    'making_bed',
+    'gardening',
+    'packing_trips',
+    'planning_birthdays',
+    'picking_movies',
+    'initiating_social'
+  ];
+
   -- "I love it / I'll handle this" answers (highest tier)
   lead_answers TEXT[] := ARRAY[
     'love',
@@ -112,14 +132,14 @@ BEGIN
   SELECT age, location INTO user2_age, user2_location
   FROM public.profiles WHERE user_id = user2_id;
 
-  -- Count total questions both users answered (excluding gender/looking_for)
+  -- Count total scored questions both users answered
   SELECT COUNT(DISTINCT qa1.question_id)
   INTO total_questions
   FROM public.quiz_answers qa1
   INNER JOIN public.quiz_answers qa2 ON qa1.question_id = qa2.question_id
   WHERE qa1.user_id = user1_id
     AND qa2.user_id = user2_id
-    AND qa1.question_id NOT IN ('gender', 'looking_for');
+    AND qa1.question_id = ANY(scored_question_ids);
 
   -- HIGHEST TIER: Full points for complementary "love it" vs "prefer partner" answers
   SELECT COUNT(*)
@@ -128,7 +148,7 @@ BEGIN
   INNER JOIN public.quiz_answers qa2 ON qa1.question_id = qa2.question_id
   WHERE qa1.user_id = user1_id
     AND qa2.user_id = user2_id
-    AND qa1.question_id NOT IN ('gender', 'looking_for')
+    AND qa1.question_id = ANY(scored_question_ids)
     AND (
       -- Classic yes/no opposites
       ((qa1.answer = 'yes' AND qa2.answer = 'no') OR (qa1.answer = 'no' AND qa2.answer = 'yes'))
@@ -146,7 +166,7 @@ BEGIN
   INNER JOIN public.quiz_answers qa2 ON qa1.question_id = qa2.question_id
   WHERE qa1.user_id = user1_id
     AND qa2.user_id = user2_id
-    AND qa1.question_id NOT IN ('gender', 'looking_for')
+    AND qa1.question_id = ANY(scored_question_ids)
     AND qa1.answer = ANY(together_answers)
     AND qa2.answer = ANY(together_answers);
 
@@ -157,7 +177,7 @@ BEGIN
   INNER JOIN public.quiz_answers qa2 ON qa1.question_id = qa2.question_id
   WHERE qa1.user_id = user1_id
     AND qa2.user_id = user2_id
-    AND qa1.question_id NOT IN ('gender', 'looking_for')
+    AND qa1.question_id = ANY(scored_question_ids)
     AND qa1.answer = ANY(sometimes_answers)
     AND qa2.answer = ANY(sometimes_answers);
 
