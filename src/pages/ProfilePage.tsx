@@ -1967,6 +1967,10 @@ const ProfilePage = () => {
         onVerificationChange={async () => {
           // Refresh the potential matches list
           await fetchPotentialMatches();
+          // Refresh the admin verification queue if admin
+          if (isAdmin) {
+            await fetchUnverifiedUsers();
+          }
           // Also update the selected profile to reflect changes immediately
           if (selectedProfile?.user_id) {
             const { data } = await supabase
