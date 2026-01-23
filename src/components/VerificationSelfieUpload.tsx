@@ -112,7 +112,7 @@ export const VerificationSelfieUpload = ({ onComplete, currentSelfieUrl }: Verif
           Age Verification Selfie
         </CardTitle>
         <CardDescription>
-          Upload a clear selfie for age verification. We know this feels intrusive, but it's UK law we need to implement. To avoid storing this data long-term or sending it to third parties, this will be quickly reviewed manually by the admin and you can delete it as soon as your age has been verified. Thank you for understanding.
+          Upload a clear selfie for age verification. We know this feels intrusive, but it's UK law we need to implement. To avoid storing this data long-term or sending it to third parties, this will be quickly reviewed manually by the admin and you can delete it as soon as your age has been verified. <strong>Please allow 24–48 hours for verification</strong> — we'll update your account as soon as it's complete. Thank you for understanding.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

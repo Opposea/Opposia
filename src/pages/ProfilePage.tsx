@@ -1706,7 +1706,7 @@ const ProfilePage = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-base mb-1">Age Verification Required</h3>
                         <p className="text-sm text-muted-foreground">
-                          Upload a verification selfie to connect with matches.
+                          Upload a verification selfie to connect with matches. Please allow 24–48 hours for review.
                         </p>
                       </div>
                       <Button 
@@ -1732,7 +1732,7 @@ const ProfilePage = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-base mb-1">Verification Pending</h3>
                         <p className="text-sm text-muted-foreground">
-                          Your selfie is being reviewed. You can browse but can't connect until verified.
+                          Your selfie is being reviewed — please allow 24–48 hours. You can browse but can't connect until verified.
                         </p>
                       </div>
                     </div>
