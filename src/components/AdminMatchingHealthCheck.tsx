@@ -186,7 +186,7 @@ const AdminMatchingHealthCheck = () => {
       }
     }
 
-    // 5) are_users_compatible (must be true for any profile returned by Discover)
+    // 5) are_users_compatible (for non-admins, must be true for Discover profiles; admins bypass compatibility in Discover)
     if (targetUserId) {
       const tCompatStart = performance.now();
       try {
@@ -206,14 +206,17 @@ const AdminMatchingHealthCheck = () => {
           });
         } else {
           const isCompatible = Boolean(data);
-          const shouldBeTrue = targetSource === 'discover';
+          // Admins see ALL profiles in Discover (bypass), so compatibility may be false and that's OK
+          const fromDiscoverAsNonAdmin = targetSource === 'discover' && !isAdmin;
 
           push(newResults, {
             name: 'are_users_compatible',
-            passed: shouldBeTrue ? isCompatible : true,
-            message: shouldBeTrue
-              ? `Target came from Discover → expected true, got ${String(isCompatible)}`
-              : `Result for test target: ${String(isCompatible)}`,
+            passed: fromDiscoverAsNonAdmin ? isCompatible : true,
+            message: isAdmin
+              ? `Admin bypass active → compatibility=${String(isCompatible)} (OK either way)`
+              : targetSource === 'discover'
+                ? `Target from Discover → expected true, got ${String(isCompatible)}`
+                : `Result for test target: ${String(isCompatible)}`,
             duration,
           });
         }

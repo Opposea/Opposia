@@ -276,7 +276,7 @@ const [isSignUp, setIsSignUp] = useState(false);
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">Name or Username</Label>
                 <Input
                   id="name"
                   type="text"
@@ -284,8 +284,9 @@ const [isSignUp, setIsSignUp] = useState(false);
                   onChange={(e) => setName(e.target.value)}
                   required
                   maxLength={100}
-                  placeholder="Enter your full name"
+                  placeholder="Enter a name or username"
                 />
+                <p className="text-xs text-muted-foreground">This can be a nickname — you don't have to use your real name</p>
               </div>
             )}
             
