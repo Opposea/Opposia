@@ -86,18 +86,15 @@ const AdminMatchingHealthCheck = () => {
       });
     }
 
-    // 2) UI gate: can this user connect?
+    // 2) UI gate: can this user connect? (Age verification removed - always enabled)
     const tGateStart = performance.now();
     try {
       const duration = Math.round(performance.now() - tGateStart);
-      const canConnect = Boolean(isAdmin || viewerAgeVerified);
 
       push(newResults, {
         name: 'Connect gate (UI)',
-        passed: canConnect,
-        message: canConnect
-          ? 'Connect is enabled (admin or age_verified=true)'
-          : 'Connect is disabled because age_verified=false (users can browse but cannot connect)',
+        passed: true,
+        message: 'Connect is always enabled (age verification removed)',
         duration,
       });
     } catch (e: any) {

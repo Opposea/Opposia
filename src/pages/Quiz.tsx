@@ -6,12 +6,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Camera } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { VerificationSelfieUpload } from "@/components/VerificationSelfieUpload";
-import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const quizQuestions = [
   {
@@ -187,31 +185,9 @@ const Quiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentSelfieUrl, setCurrentSelfieUrl] = useState<string | null>(null);
-  const [isAgeVerified, setIsAgeVerified] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAdmin } = useIsAdmin();
-
-  const fetchVerificationStatus = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('verification_selfie_url, age_verified')
-      .eq('user_id', user.id)
-      .single();
-    if (data?.verification_selfie_url) {
-      setCurrentSelfieUrl(data.verification_selfie_url);
-    }
-    if (data?.age_verified) {
-      setIsAgeVerified(true);
-    }
-  };
-
-  useEffect(() => {
-    fetchVerificationStatus();
-  }, [user]);
   
   const form = useForm({
     defaultValues: Object.fromEntries(
@@ -356,31 +332,12 @@ const Quiz = () => {
             </CardContent>
           </Card>
 
-          {/* Only show verification upload if not already verified */}
-          {!isAgeVerified && (
-            <VerificationSelfieUpload 
-              currentSelfieUrl={currentSelfieUrl}
-              onComplete={() => fetchVerificationStatus()}
-            />
-          )}
-
           <div className="space-y-4">
-            {!isAdmin && !isAgeVerified && !currentSelfieUrl && (
-              <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-500/50">
-                <CardContent className="py-4 text-center">
-                  <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center justify-center gap-2">
-                    <Camera className="w-4 h-4" />
-                    Please upload a verification selfie to access matches
-                  </p>
-                </CardContent>
-              </Card>
-            )}
             <Button 
               variant="magnetic" 
               size="lg" 
               className="w-full"
               onClick={() => navigate('/profile?tab=discover')}
-              disabled={!isAdmin && !isAgeVerified && !currentSelfieUrl}
             >
               Discover Your Matches
             </Button>

@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, MapPin, Heart, MessageCircle, Ban } from 'lu
 import { supabase } from '@/integrations/supabase/client';
 import OnlineIndicator from './OnlineIndicator';
 import VerificationBadge from './VerificationBadge';
-import AdminVerificationPanel from './AdminVerificationPanel';
+
 import { cn } from '@/lib/utils';
 import { generateBadgesFromQuizAnswers, getBadgeColorClass, QuizBadge, QuizAnswer } from '@/lib/quizBadges';
 
@@ -28,8 +28,6 @@ interface Profile {
   avatar_url?: string;
   country?: string;
   date_of_birth?: string;
-  age_verified?: boolean;
-  verification_selfie_url?: string | null;
 }
 
 interface EnlargedProfileViewProps {
@@ -306,18 +304,6 @@ const EnlargedProfileView: React.FC<EnlargedProfileViewProps> = ({
               </div>
             )}
 
-            {/* Admin Verification Panel - Only visible to admins for unverified users */}
-            {localProfile.id && !localProfile.age_verified && !justVerified && (
-              <AdminVerificationPanel
-                userId={localProfile.user_id}
-                profileId={localProfile.id}
-                currentlyVerified={localProfile.age_verified || false}
-                userCountry={localProfile.country}
-                dateOfBirth={localProfile.date_of_birth}
-                verificationSelfieUrl={localProfile.verification_selfie_url}
-                onVerificationChange={handleVerificationChange}
-              />
-            )}
 
             <div className="flex flex-col gap-2 pt-4">
               {onConnect && (
