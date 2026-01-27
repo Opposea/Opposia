@@ -399,9 +399,6 @@ const [isSignUp, setIsSignUp] = useState(false);
                       <option value="NZ">New Zealand</option>
                     </optgroup>
                   </select>
-                  {country === 'GB' && (
-                    <p className="text-xs text-amber-600">UK members require manual age verification for regulatory compliance</p>
-                  )}
                   <p className="text-xs text-muted-foreground">Service available in UK, EU, USA, Canada, Australia & New Zealand only</p>
                 </div>
 

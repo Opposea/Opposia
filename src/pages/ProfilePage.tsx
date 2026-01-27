@@ -38,7 +38,7 @@ import GiftSender from '@/components/GiftSender';
 import AdminDeletionRequestsPanel from '@/components/AdminDeletionRequestsPanel';
 import AdminMatchingHealthCheck from '@/components/AdminMatchingHealthCheck';
 
-import { VerificationSelfieUpload } from '@/components/VerificationSelfieUpload';
+
 import { z } from 'zod';
 import { useSearchParams } from 'react-router-dom';
 
@@ -57,8 +57,6 @@ interface Profile {
   looking_for?: string;
   country?: string;
   date_of_birth?: string;
-  age_verified?: boolean;
-  verification_selfie_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -471,24 +469,10 @@ const ProfilePage = () => {
     }
   };
 
-  // Fetch ALL unverified users for admin verification queue (bypasses compatibility filtering)
+  // Fetch unverified users - no longer used (age verification removed)
   const fetchUnverifiedUsers = async () => {
-    if (!user?.id || !isAdmin) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, user_id, name, age, bio, location, avatar_url, interests, is_verified, country, date_of_birth, age_verified, verification_selfie_url, created_at, updated_at')
-        .eq('age_verified', false)
-        .neq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setUnverifiedUsers((data as any as Profile[]) || []);
-    } catch (error) {
-      console.error('Error fetching unverified users:', error);
-      setUnverifiedUsers([]);
-    }
+    // Age verification has been removed
+    setUnverifiedUsers([]);
   };
 
   const fetchBlockedUsers = async () => {
@@ -1239,12 +1223,6 @@ const ProfilePage = () => {
                     <div className="mt-6 bg-gradient-to-br from-primary/5 to-secondary/5 p-6 rounded-xl border border-primary/10">
                       <PhotoGallery userId={user.id} isOwnProfile={true} />
                     </div>
-                    
-                    <div className="mt-6">
-                      <VerificationSelfieUpload 
-                        currentSelfieUrl={profile?.verification_selfie_url}
-                      />
-                    </div>
                   </>
                 )}
 
@@ -1695,50 +1673,6 @@ const ProfilePage = () => {
                 </div>
               )}
 
-              {/* Verification banners - show above matches but don't block browsing */}
-              {!isAdmin && !profile?.age_verified && !profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20 mb-6">
-                  <CardContent className="py-6 px-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                        <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base mb-1">Age Verification Required</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Upload a verification selfie to connect with matches. Please allow 24–48 hours for review.
-                        </p>
-                      </div>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        className="bg-amber-600 hover:bg-amber-700"
-                        onClick={() => setActiveTab('profile')}
-                      >
-                        Verify Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {!isAdmin && !profile?.age_verified && profile?.verification_selfie_url && (
-                <Card className="shadow-soft border-2 border-blue-500/50 bg-gradient-to-br from-blue-50/50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 mb-6">
-                  <CardContent className="py-6 px-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                        <ShieldCheck className="w-6 h-6 text-blue-600 dark:text-blue-500" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base mb-1">Verification Pending</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Your selfie is being reviewed — please allow 24–48 hours. You can browse but can't connect until verified.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Prompt to complete quiz if gender + preference missing */}
               {(!profile?.gender || (!profile?.looking_for && !profile?.sexual_orientation)) && (
@@ -1771,7 +1705,7 @@ const ProfilePage = () => {
                       ? unverifiedUsers.map(u => ({ ...u, compatibility_score: 0 }))
                       : potentialMatches;
                     
-                    const canConnect = isAdmin || profile?.age_verified;
+                    const canConnect = true; // Age verification removed
                     
                     return displayedMatches.length === 0 ? (
                       <Card className="shadow-soft">
@@ -1860,7 +1794,7 @@ const ProfilePage = () => {
                               avatarUrl={potentialMatch.avatar_url}
                               interests={potentialMatch.interests || []}
                               isOnline={false}
-                              isVerified={potentialMatch.age_verified || false}
+                              isVerified={true}
                               compatibilityScore={potentialMatch.compatibility_score}
                               onConnect={canConnect ? () => sendMatch(potentialMatch.user_id) : undefined}
                             />
@@ -1963,7 +1897,7 @@ const ProfilePage = () => {
         onBlock={selectedProfile ? () => blockUser(selectedProfile.user_id) : undefined}
         compatibilityScore={(selectedProfile as any)?.compatibility_score}
         isOnline={Math.random() > 0.5}
-        isVerified={selectedProfile?.age_verified || false}
+        isVerified={true}
         onVerificationChange={async () => {
           // Refresh the potential matches list
           await fetchPotentialMatches();
