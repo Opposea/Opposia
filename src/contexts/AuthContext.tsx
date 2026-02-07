@@ -8,7 +8,7 @@ interface AuthContextType {
   session: Session | null;
   signUp: (email: string, password: string, name: string, dateOfBirth: string, country: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithProvider: (provider: 'facebook' | 'twitter') => Promise<{ error: any }>;
+  signInWithProvider: (provider: 'google' | 'facebook' | 'twitter') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signInWithProvider = async (provider: 'facebook' | 'twitter') => {
+  const signInWithProvider = async (provider: 'google' | 'facebook' | 'twitter') => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
